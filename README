@@ -1,0 +1,69 @@
+Pour compiler PETSc:
+
+./configure --download-c-blas-lapack=yes --with-scalar-type=complex --with-fortran=0 --with-debugging=yes --with-shared=0 --with-petsc-arch=linux-c-debug-complex
+
+Pour SLEPc un configure suffit, il peut être intéressant de lui indiquer où se trouvent les librairies PARPACK, ARPACK.
+
+
+
+Commandes :
+
+make: compiler le logiciel
+
+make distclean : effacer fichiers objet
+
+make rmat : effacer fichier temporaires matrices (peut être utile en cas de pb sur des runs successifs pour une même matrice)
+
+make runx : lancer le cas test correspondant à x
+
+
+Options :
+
+Chaque option existante est répertoriée dans le makefile tant pour l'autotuning que pour la méthode de résolution.
+
+
+
+##################      Tuning  FLAGS      #######################
+
+RESTART_MAX=  taille de sous espace maximale
+RESTART_MIN=  taille de sous-espace minimale
+RESTART_INCREMENT = incrément de diminution de la taille de sous espace
+RESTART_STRATEGY = stratégie de calcul de la taille de sous espace
+RESTART_FULL_TYPE = type de redémarrage entier (diminuer, augmenter)
+ORTHOG_TYPE = type d'orthogonalisation (MGS, CGS, LAST, ALT) préférez MGS (param 0)
+ORTHOG_SIZE = tronquer manuellement (valeur de troncation) mini =1 max = RESTART_MAX
+ORTHOG_HEURISTIC = type d'heuristique pour l'orthog (choisir 1 pour LAST VECTORS et 4 pour algo autotuning)
+
+
+#debug options
+# DEBUG_VALGRIND = valgrind --tool=memcheck -q
+#DEBUG_KSP_VIEW = -ksp_view
+
+#gmres options
+GMRES_PRECISION = précision de la solution
+GMRES_RESTART = taille de sous-espace de GMRES (=restart_max
+GMRES_NB_NODES = nombre de noeuds de calcul pour GMRES
+GMRES_MONITOR = commenter si on ne veut pas observer la convergence
+GMRES_FLAGS = le flag ksp_max_it est le nombre d'itérations max de GMRES
+
+#arnoldi options
+ARNOLDI_PRECISION = précision des valeurs propres
+ARNOLDI_NBEIGEN = combien de valeur propre doit on calculer
+ARNOLDI_NB_NODES = nombre de noeuds de calculs dédiés à arnoldi
+ARNOLDI_MONITOR = laisser décommenté si on veut observer la trace de convergence d'arnoldi
+ARNOLDI_LOAD_ANY = décommenter si on veut charger les valeurs propres aux démarrages de la méthode (un fichier doit exister !)
+
+
+#ls options
+LS_POWER = puissance polynôme ls 
+LS_POLY_APPL = nombre de fois que polynôme appliqué à la solution temporaire GMRES
+LS_LATENCY = nombre de restarts avant préconditionnement
+LS_PC_USE = mettre à 1 pour utiliser précond ls et à 0 si on ne veut pas
+LS_HANG_IT = nombre d'étapes gmres à partir duquel on attend pendant x temps (mettre à ksp_max_it pour ne pas utiliser cette fonction, utile pour tests uniquement)
+LS_HANG_TIME =  temps d'attente de GMRES pour l'option juste au dessus
+LS_LOAD_ANY = charger des paramètres ls au démarrage de la méthode, peut être intéressant pour préconditionner de manière précoce.
+
+
+
+
+

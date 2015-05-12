@@ -1,0 +1,17 @@
+#specific files
+hyperh
+matrices_tmp
+
+#global files
+syntax: glob
+*.out
+*.o
+*~
+*swp
+*.directory
+*.txt
+*._*
+*.kdev4
+*.swo
+*.orig
+*.bin
