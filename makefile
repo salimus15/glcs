@@ -112,7 +112,7 @@ exec: main.o
 	-@echo "========================================="
 	-@echo ${CLINKER}	
 	-@echo " -----------------------------------------------------------"
-	@${CLINKER} -g -v -o ${EXEC} main.o ${OFILES} ${HFILES} -I/home/vassago/Tools/petsc-3.5.3/include -L${SLEPC_LIB} -L${PETSC_DIR}/${PETSC_ARCH}/lib  -L.
+	@${CLINKER} -g -v -o ${EXEC} main.o ${OFILES} ${HFILES} -I${PETSC_DIR}/include -L${SLEPC_LIB} -L${PETSC_DIR}/${PETSC_ARCH}/lib  -L.
 
 effacer :
 	-rm *.o 
