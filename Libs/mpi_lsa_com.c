@@ -1,7 +1,12 @@
 /*CREATED BY PIERRE-YVES AQUILANTI 2011*/
 #include "mpi_lsa_com.h"
 
-/* Exchange information about the vector location within each intracommunicator to allow asynchronous communications */
+/***********************************************************************************
+*	\brief Exchange information about the vector location within each intracommunicator to allow asynchronous communications 
+*
+*	
+*
+************************************************************************************/
 int mpi_lsa_com_vecsize_init(com_lsa * com, Vec * v){
 	PetscErrorCode ierr;
 	int * size1,*size2;
@@ -60,10 +65,14 @@ int mpi_lsa_com_vecsize_init(com_lsa * com, Vec * v){
 	com->out_vec_sended=0;
 	com->array_out_sended=0;
 
+
+/*********************************************************************************** 
+***************** 		TO SEE 		********************************************
+***********************************************************************************/
+
 	/* now process to the exchange */
 	MPI_Allgather(&local_size,1,MPI_INT,size1,number1,MPI_INT,com1);
 	MPI_Allgather(&local_size,1,MPI_INT,size2,number2,MPI_INT,com2);
-
 
 	// displacements for each in or out node
 	com->vec_in_disp[0]=0;
@@ -81,7 +90,12 @@ int mpi_lsa_com_vecsize_init(com_lsa * com, Vec * v){
 	return 0;
 }
 
-/* send data to one or many nodes through an intercommunicator */
+/*********************************************************************************** 
+*	\brief send data to one or many nodes through an intercommunicator 
+*
+*
+*
+************************************************************************************/
 int mpi_lsa_com_vec_send(com_lsa * com, Vec * v){
 	int i,incr,tmp_int,vsize,send_size;
 	PetscScalar * array;
@@ -93,6 +107,7 @@ int mpi_lsa_com_vec_send(com_lsa * com, Vec * v){
 
 	/* check if previous requests where completed */
 	for(i=0;i<com->out_vec_sended;i++){
+		
 		MPI_Test(&(com->vec_requests[i]),&flag,&status);
 		/* if not cancel it */
 		if(!flag){
@@ -101,7 +116,9 @@ int mpi_lsa_com_vec_send(com_lsa * com, Vec * v){
 			tmp_global=(PetscScalar)0;
 
 			/*now proceed to the communication*/
+			// we comput the sum of tmp local of the group within each node of the group
 			MPI_Allreduce(&tmp_local,&tmp_global,1,MPIU_SCALAR,MPI_SUM,com->com_group);
+			// determines the size of com_group
 			MPI_Comm_size(com->com_group,&vsize);
 
 			/* we update the vector to send to the latest version */
@@ -120,11 +137,20 @@ int mpi_lsa_com_vec_send(com_lsa * com, Vec * v){
 	MPI_Barrier(PETSC_COMM_WORLD);
 
 	/* extract the vector array */
+	// first we get the size of the array (stored in the local memory)
 	ierr=VecGetLocalSize(*v,&vsize);CHKERRQ(ierr);
+	// and now we get a pointer to that array  
 	ierr=VecGetArray(*v,&array);CHKERRQ(ierr);
 
+	// we copy the array extracted to the sended_buffer
 	for(i=0;i<vsize;i++)
 		(com->out_sended_buffer)[i]=(PetscScalar)array[i];
+		
+		
+		
+/*********************************************************************************** 
+***************** 		TO SEE 		********************************************
+***********************************************************************************/
 
 	/* for each node in the out domain */
 	for(i=0;i<com->out_number;i++){
@@ -149,6 +175,13 @@ int mpi_lsa_com_vec_send(com_lsa * com, Vec * v){
 
 	return 0;
 }
+
+/*********************************************************************************** 
+*	\brief 
+*
+*
+*
+************************************************************************************/
 
 
 int mpi_lsa_com_vec_recv(com_lsa * com, Vec * v){

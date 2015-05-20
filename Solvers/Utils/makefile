@@ -7,8 +7,8 @@ SOURCEH  =  ellipse.h convhul.h triep.h lib.h
 CLEANFILE    = ellipse.o convhul.o triep.o lib.o
 
 %.o: %.c
+#	scorep ${CC} ${CFLAGS} -c $< -o ./$@
 	@${CC} ${CFLAGS} -c $< -o ./$@
-
 all: ${CLEANFILE}
 
 #cleanall: ${CLEANFILE}

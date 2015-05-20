@@ -29,10 +29,11 @@ PetscErrorCode launchGMRES(com_lsa * com, Vec * b, Mat * A){
 
 	ierr = MyKSPSolve(ksp, *b, x,com); CHKERRQ(ierr);
 
-
+	PetscPrintf(com->com_group,"#} MyKSPSolve succesfully ended \n");
 	KSPGetConvergedReason(ksp,&reason);
-
+	PetscPrintf(com->com_group,"#} KSPGetConvergedReason  succesfully ended \n");
 	ierr = KSPDestroy(&ksp);CHKERRQ(ierr);
+	PetscPrintf(com->com_group,"#} KSPDestroy  succesfully ended \n");
 	ierr = VecDestroy(&x);CHKERRQ(ierr);
 
 	PetscPrintf(com->com_group,"#} GMRES Linear system Solved with reason : %D \n",reason);

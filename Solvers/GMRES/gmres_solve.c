@@ -21,7 +21,7 @@ static PetscErrorCode MyKSPFGMRESResidual(KSP ksp)
 
 #undef __FUNCT__
 #define __FUNCT__ "MyKSPSolve_FGMRES"
-PetscErrorCode KSPSolve_FGMRES(KSP ksp,com_lsa * com)
+PetscErrorCode MyKSPSolve_FGMRES(KSP ksp,com_lsa * com)
 {
   PetscErrorCode ierr;
   PetscInt       cycle_its = 0; /* iterations done in a call to KSPFGMRESCycle */

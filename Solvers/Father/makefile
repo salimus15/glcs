@@ -7,6 +7,7 @@ SOURCEH  =  father.h
 CLEANFILE  = father.o
 
 %.o: %.c
+#	scorep ${CC} ${CFLAGS} -c $< -o ./$@
 	@${CC} ${CFLAGS} -c $< -o ./$@
 
 all: ${CLEANFILE}

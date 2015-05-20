@@ -109,8 +109,10 @@ rmat :
 
 exec: main.o
 	-@echo "BEGINNING TO COMPILE APPLICATION "
-	-@echo "========================================="	
-	${CLINKER} -g -v -o ${EXEC} main.o ${OFILES} ${HFILES} -I/home/vassago/Tools/petsc-3.5.3/include -L${SLEPC_LIB} -L${PETSC_DIR}/${PETSC_ARCH}/lib  -L.
+	-@echo "========================================="
+	-@echo ${CLINKER}	
+	-@echo " -----------------------------------------------------------"
+	@${CLINKER} -g -v -o ${EXEC} main.o ${OFILES} ${HFILES} -I/home/vassago/Tools/petsc-3.5.3/include -L${SLEPC_LIB} -L${PETSC_DIR}/${PETSC_ARCH}/lib  -L.
 
 effacer :
 	-rm *.o 
@@ -125,11 +127,18 @@ effacer :
 ##################     Execution Rules     #######################
 ##################################################################
 runs:
-	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh ${GLSA_FLAGS} \
-	-mfile ${MDIR}/utm1700b/utm1700b.mtx  \
-#	-mfile ${MDIR}/fs_183_1.mtx_183x183_1069nnz \
-#	-vfile ${MDIR}/utm1700b/data/utm1700b_b \
+	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
+	-mfile ${MDIR}/young4c.mtx_841x841_4089nnz \
 	2>&1 | tee log.txt
+	
+
+#valgrind --sigill-diagnostics=yes --show-below-main=yes --leak-check=full --show-leak-kinds=all
+runx:
+	 ${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND}  ./hyperh ${GLSA_FLAGS} \
+	-mfile ${MDIR}/waveguide3D.mtx_21036x21036_303468nnz  \
+	-vfile ${MDIR}/waveguide3D_b.mtx_21036 \
+	2>&1 | tee log.txt
+
 
 runa:
 	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh ${GLSA_FLAGS} \

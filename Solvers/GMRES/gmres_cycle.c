@@ -164,7 +164,7 @@ PetscErrorCode MyKSPFGMRESCycle(PetscInt *itcount,KSP ksp)
 
 
 #undef __FUNCT__
-#define __FUNCT__ "MyFGMRESUpdateHessenberg"
+#define __FUNCT__ "MyKSPFGMRESUpdateHessenberg"
 PetscErrorCode MyKSPFGMRESUpdateHessenberg(KSP ksp,PetscInt it,PetscBool hapend,PetscReal *res)
 {
   PetscScalar   *hh,*cc,*ss,tt;
@@ -247,7 +247,7 @@ PetscErrorCode MyKSPFGMRESUpdateHessenberg(KSP ksp,PetscInt it,PetscBool hapend,
 
 
 #undef __FUNCT__
-#define __FUNCT__ "MyFGMRESGetNewVectors"
+#define __FUNCT__ "MyKSPFGMRESGetNewVectors"
 PetscErrorCode MyKSPFGMRESGetNewVectors(KSP ksp,PetscInt it)
 {
   KSP_FGMRES     *fgmres = (KSP_FGMRES *)ksp->data;

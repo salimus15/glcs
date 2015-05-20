@@ -7,6 +7,7 @@ SOURCEH  =  arnoldi.h
 CLEANFILE    = arnoldi.o
 
 %.o: %.c
+#	scorep ${CC} ${CFLAGS} -c $< -o ./$@
 	@${CC} ${CFLAGS} -c $< -o ./$@
 
 all: ${CLEANFILE}

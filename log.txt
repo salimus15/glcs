@@ -1,0 +1,80 @@
+NOTE : Using LSA mode.
+]> Creating Groups
+]> Creating intercommunicators
+-One Way :
+	 *> 0 -> 3 
+]> The Other : 
+	 *> 0 -> 1 
+]> In and Out communicators : 
+	 *> 2 -> 1 	 *> 2 -> 3 ARNOLDI : 2: 1 (1) -> 2 (1) -> 3 (1)
+	 *> 3 -> 0 	 *> 3 -> 2 LS :      3: 2 (1) -> 3 (1) -> 0 (1)
+GMRES :   0: 3 (1) -> 0 (1) -> 1 (1)
+]> MPI communications ready to be used
+	 *> 1 -> 2 	 *> 1 -> 0 MAIN :    1: 0 (1) -> 1 (1) -> 2 (1)
+]> Initializing PETSc/SLEPc
+]> Checking temporary directory structure
+]> Creating directory : /home/vassago/Projects/glcs/matrices_tmp
+]> Creating the directory structure for each group...
+]> Creating directory : /home/vassago/Projects/glcs/matrices_tmp/gmres
+]> Creating directory : /home/vassago/Projects/glcs/matrices_tmp/father
+]> Creating directory : /home/vassago/Projects/glcs/matrices_tmp/ls
+]> Creating directory : /home/vassago/Projects/glcs/matrices_tmp/arnoldi
+]> Opening input data files
+Loading Matrix : ./data/waveguide3D.mtx_21036x21036_303468nnz
+Loading Matrix : ./data/waveguide3D.mtx_21036x21036_303468nnz
+Loading Matrix : ./data/waveguide3D.mtx_21036x21036_303468nnz
+Loading Matrix : ./data/waveguide3D.mtx_21036x21036_303468nnz
+Loaded Matrix of size : 21036 21036
+Loading Vector : ./data/waveguide3D_b.mtx_21036
+Loaded Matrix of size : 21036 21036
+Loading Vector : ./data/waveguide3D_b.mtx_21036
+Loaded Matrix of size : 21036 21036
+Loading Vector : ./data/waveguide3D_b.mtx_21036
+Loaded Matrix of size : 21036 21036
+Loading Vector : ./data/waveguide3D_b.mtx_21036
+Loaded Vector of size : 21036
+Loaded Vector of size : 21036
+]> Now exchanging vector sizes...
+Loaded Vector of size : 21036
+Loaded Vector of size : 21036
+]> Vector Exchange OK   ...
+]> not using LSA preconditionning 0
+End of Computation
+End of Computation
+]> Launching GMRES
+#} GMRES Creating and setting vector x
+End of Computation
+#} GMRES Creating KSP
+#} GMRES Solving...
+kspsolve.c:12: __FUNCT__="KSP_PCApplyBAorABTranspose" does not agree with __func__="MyKSPSolve"
+ alama dagui ILHA .... :) :)
+   0 KSP unpreconditioned resid norm 3.465032417179e+02 true resid norm 3.465032417179e+02 ||r(i)||/||b|| 1.000000000000e+00
+  1 KSP unpreconditioned resid norm 2.358172540312e+02 true resid norm 2.358172540312e+02 ||r(i)||/||b|| 6.805629086242e-01
+  2 KSP unpreconditioned resid norm 2.297565448042e+02 true resid norm 2.297565448042e+02 ||r(i)||/||b|| 6.630718479433e-01
+  3 KSP unpreconditioned resid norm 2.164476793770e+02 true resid norm 2.164476793770e+02 ||r(i)||/||b|| 6.246627832510e-01
+  4 KSP unpreconditioned resid norm 1.732246621765e+02 true resid norm 1.732246621766e+02 ||r(i)||/||b|| 4.999221978927e-01
+  5 KSP unpreconditioned resid norm 1.437477356876e+02 true resid norm 1.437477356876e+02 ||r(i)||/||b|| 4.148524988537e-01
+  6 KSP unpreconditioned resid norm 1.360245897307e+02 true resid norm 1.360245897307e+02 ||r(i)||/||b|| 3.925636858586e-01
+  7 KSP unpreconditioned resid norm 1.358108581432e+02 true resid norm 1.358108581432e+02 ||r(i)||/||b|| 3.919468616509e-01
+  8 KSP unpreconditioned resid norm 1.260919402234e+02 true resid norm 1.260919402234e+02 ||r(i)||/||b|| 3.638982988968e-01
+  9 KSP unpreconditioned resid norm 1.110097779775e+02 true resid norm 1.110097779775e+02 ||r(i)||/||b|| 3.203715423474e-01
+ 10 KSP unpreconditioned resid norm 1.029161900611e+02 true resid norm 1.029161900611e+02 ||r(i)||/||b|| 2.970136427898e-01
+ 11 KSP unpreconditioned resid norm 1.018848923321e+02 true resid norm 1.018848923321e+02 ||r(i)||/||b|| 2.940373424128e-01
+ 12 KSP unpreconditioned resid norm 1.006536724672e+02 true resid norm 1.006536724672e+02 ||r(i)||/||b|| 2.904840715723e-01
+ 13 KSP unpreconditioned resid norm 9.424756358870e+01 true resid norm 9.424756358870e+01 ||r(i)||/||b|| 2.719961958262e-01
+ 14 KSP unpreconditioned resid norm 8.780038354068e+01 true resid norm 8.780038354068e+01 ||r(i)||/||b|| 2.533897896752e-01
+ 15 KSP unpreconditioned resid norm 8.562444517197e+01 true resid norm 8.562444517197e+01 ||r(i)||/||b|| 2.471100840138e-01
+ 16 KSP unpreconditioned resid norm 8.558993530815e+01 true resid norm 8.558993530815e+01 ||r(i)||/||b|| 2.470104893790e-01
+ 17 KSP unpreconditioned resid norm 8.277738096568e+01 true resid norm 8.277738096568e+01 ||r(i)||/||b|| 2.388935253687e-01
+ 18 KSP unpreconditioned resid norm 7.792572314432e+01 true resid norm 7.792572314432e+01 ||r(i)||/||b|| 2.248917578894e-01
+ 19 KSP unpreconditioned resid norm 7.550212411134e+01 true resid norm 7.550212411134e+01 ||r(i)||/||b|| 2.178973095231e-01
+ 20 KSP unpreconditioned resid norm 7.542181184644e+01 true resid norm 7.542181184644e+01 ||r(i)||/||b|| 2.176655302632e-01
+ 21 KSP unpreconditioned resid norm 7.422200323229e+01 true resid norm 7.422200323229e+01 ||r(i)||/||b|| 2.142029115350e-01
+ 22 KSP unpreconditioned resid norm 7.112514443245e+01 true resid norm 7.112514443245e+01 ||r(i)||/||b|| 2.052654517165e-01
+ 23 KSP unpreconditioned resid norm 6.906104551155e+01 true resid norm 6.906104551155e+01 ||r(i)||/||b|| 1.993085120046e-01
+ 24 KSP unpreconditioned resid norm 6.884191806766e+01 true resid norm 6.884191806766e+01 ||r(i)||/||b|| 1.986761154856e-01
+ 25 KSP unpreconditioned resid norm 6.833128464950e+01 true resid norm 6.833128464951e+01 ||r(i)||/||b|| 1.972024397542e-01
+ 26 KSP unpreconditioned resid norm 6.623144537459e+01 true resid norm 6.623144537459e+01 ||r(i)||/||b|| 1.911423542424e-01
+ 27 KSP unpreconditioned resid norm 6.432617440756e+01 true resid norm 6.432617440756e+01 ||r(i)||/||b|| 1.856437881754e-01
+ 28 KSP unpreconditioned resid norm 6.386401310316e+01 true resid norm 6.386401310316e+01 ||r(i)||/||b|| 1.843100017955e-01
+ 29 KSP unpreconditioned resid norm 6.371460891504e+01 true resid norm 6.371460891504e+01 ||r(i)||/||b|| 1.838788249113e-01

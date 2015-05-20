@@ -7,6 +7,7 @@ SOURCEH  =  lsqr.h precond.h
 CLEANFILE    = lsqr.o precond.o
 
 %.o: %.c
+#	scorep ${CC} ${CFLAGS} -c $< -o ./$@
 	@${CC} ${CFLAGS} -c $< -o ./$@
 
 all: ${CLEANFILE}

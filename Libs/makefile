@@ -7,6 +7,7 @@ SOURCEH  =  mpi_lsa.h args_handler.h mpi_lsa_com.h read_matrix.h data_rw.h real2
 CLEANFILE = mpi_lsa.o args_handler.o mpi_lsa_com.o read_matrix.o data_rw.o real2complex.o
 
 %.o: %.c
+#	scorep ${CC} ${CFLAGS} -c $< -o ./$@
 	@${CC} ${CFLAGS} -c $< -o ./$@
 
 all: ${CLEANFILE}
