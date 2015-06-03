@@ -64,6 +64,35 @@ LS_HANG_TIME =  temps d'attente de GMRES pour l'option juste au dessus
 LS_LOAD_ANY = charger des paramètres ls au démarrage de la méthode, peut être intéressant pour préconditionner de manière précoce.
 
 
+########################################################################
+using flags 
+-lsa_gmres NBn : NBn means the number of nodes for gmres process 
+-lsa_arnoldi NBn : NBn means the number of nodes for Arnoldi process
+-tmp_path path	: path where to put(unpack) temporary matrices 
+-mfile file : file containing the matrix 
+-vfile file : file containing the vector 
+-Aclx : means that the matrix must be converted from complex to real 
+-ksp_ls_nopc : indicates wether ls preconditionning is used or not
+-output_file
+
+-ksp_max_it 	- maximum number of linear iterations
+-ksp_rtol rtol 	- relative tolerance used in default determination of convergence, i.e. if residual norm decreases by this factor than convergence is declared
+-ksp_atol abstol 	- absolute tolerance used in default convergence test, i.e. if residual norm is less than this then convergence is declared
+-ksp_divtol tol 	- if residual norm increases by this factor than divergence is declared
+-ksp_converged_use_initial_residual_norm 	- see KSPConvergedDefaultSetUIRNorm()
+-ksp_converged_use_min_initial_residual_norm 	- see KSPConvergedDefaultSetUMIRNorm()
+-ksp_norm_type 	- none - skip norms used in convergence tests (useful only when not using convergence test (say you always want to run with 5 iterations) to save on communication overhead preconditioned - default for left preconditioning unpreconditioned - see KSPSetNormType() natural - see KSPSetNormType()
+-ksp_check_norm_iteration it 	- do not compute residual norm until iteration number it (does compute at 0th iteration) works only for PCBCGS, PCIBCGS and and PCCG
+-ksp_lag_norm 	- compute the norm of the residual for the ith iteration on the i+1 iteration; this means that one can use the norm of the residual for convergence test WITHOUT an extra MPI_Allreduce() limiting global synchronizations. This will require 1 more iteration of the solver than usual.
+-ksp_fischer_guess <model,size> 	- uses the Fischer initial guess generator for repeated linear solves
+-ksp_constant_null_space 	- assume the operator (matrix) has the constant vector in its null space
+-ksp_test_null_space 	- tests the null space set with KSPSetNullSpace() to see if it truly is a null space
+-ksp_knoll 	- compute initial guess by applying the preconditioner to the right hand side
+-ksp_monitor_cancel 	- cancel all previous convergene monitor routines set
+-ksp_monitor <optional filename> 	- print residual norm at each iteration
+-ksp_monitor_lg_residualnorm 	- plot residual norm at each iteration
+-ksp_monitor_solution 	- plot solution at each iteration
+-ksp_monitor_singular_value 	- monitor extremem singular values at each iteration 
 
 
 

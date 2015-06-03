@@ -16,10 +16,16 @@ PetscErrorCode LSQR(com_lsa * com, int * vector_size){
 	PetscInt ls_eigen_min, ls_eigen; // use default values
 	PetscErrorCode ierr;
  	PetscScalar * result_array,*data_buffer;/*[EIGEN_ALL*3+2]*/
-
+	FILE * ftest = NULL;
+	int descriptor;
 	sprintf(load_path,"./lsqr.bin");
 	sprintf(export_path,"./lsqr.bin");
-
+	
+	if((ftest = fopen((char *)load_path, "r")) == NULL)
+	{
+		ierr=PetscBinaryOpen(load_path,FILE_MODE_WRITE,&descriptor);CHKERRQ(ierr);
+		ierr=PetscBinaryClose(descriptor);CHKERRQ(ierr);
+	}else fclose(ftest);
 
 	/* check if there is arguments for ls */
 	ierr=PetscOptionsGetInt(PETSC_NULL,"-ksp_ls_eigen_min",&ls_eigen_min,&flag);CHKERRQ(ierr);

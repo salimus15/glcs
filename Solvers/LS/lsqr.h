@@ -13,6 +13,7 @@
 #include "./precond.h"
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #ifndef EIGEN_MIN
 #define EIGEN_MIN 5

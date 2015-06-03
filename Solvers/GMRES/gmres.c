@@ -25,10 +25,13 @@ PetscErrorCode launchGMRES(com_lsa * com, Vec * b, Mat * A){
 	ierr = KSPSetFromOptions(ksp);CHKERRQ(ierr);
 
 	PetscPrintf(com->com_group,"#} GMRES Solving...\n");
-
+/* *******************************************************************
+******************************************************************** */
 
 	ierr = MyKSPSolve(ksp, *b, x,com); CHKERRQ(ierr);
-
+	
+/* **********************************************************************
+********************************************************************** */
 	PetscPrintf(com->com_group,"#} MyKSPSolve succesfully ended \n");
 	KSPGetConvergedReason(ksp,&reason);
 	PetscPrintf(com->com_group,"#} KSPGetConvergedReason  succesfully ended \n");

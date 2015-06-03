@@ -11,7 +11,7 @@ PetscErrorCode MyKSPSolve(KSP ksp,Vec b,Vec x,com_lsa * com)
 	
   PetscFunctionBegin;
 //  PetscPrintf(com.com_world,"]> jusque la c bon va\n");
-printf(" alama dagui ILHA .... :) :)\n ");
+
   PetscValidHeaderSpecific(ksp,KSP_CLASSID,1);
   if (b) PetscValidHeaderSpecific(b,VEC_CLASSID,2);
   if (x) PetscValidHeaderSpecific(x,VEC_CLASSID,3);
@@ -119,6 +119,7 @@ printf(" alama dagui ILHA .... :) :)\n ");
   if (ksp->postsolve) {
     ierr = (*ksp->postsolve)(ksp,ksp->vec_rhs,ksp->vec_sol,ksp->postctx);CHKERRQ(ierr);
   }
+  /* ******************************************************************************************************* */
 printf(" alama dagui ILHA .... :) :)\n ");
   if (ksp->guess) {
     ierr = KSPFischerGuessUpdate(ksp->guess,ksp->vec_sol);CHKERRQ(ierr);
