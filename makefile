@@ -21,14 +21,14 @@ MDIR=./data
 ##################      Tuning  FLAGS      #######################
 ##################################################################
 
-RESTART_MAX=  10000
+RESTART_MAX=  100
 RESTART_MIN=  3
 RESTART_INCREMENT = 3
-RESTART_STRATEGY = RESTART_SIMPLE
+RESTART_STRATEGY = none
 RESTART_FULL_TYPE = none
-ORTHOG_TYPE = 0
+ORTHOG_TYPE = 1
 ORTHOG_SIZE = ${RESTART_MAX}
-ORTHOG_HEURISTIC = 4
+ORTHOG_HEURISTIC = 1
 RESTART =  -ksp_gmres_restart_min ${RESTART_MIN} -restart_type ${RESTART_STRATEGY} -restart_type_full ${RESTART_FULL_TYPE}
 ORTHOG = -iorthog_type ${ORTHOG_TYPE} -iorthog_size ${ORTHOG_SIZE} -iorthog_heurist ${ORTHOG_HEURISTIC}
 
@@ -40,30 +40,30 @@ ORTHOG = -iorthog_type ${ORTHOG_TYPE} -iorthog_size ${ORTHOG_SIZE} -iorthog_heur
 # DEBUG_VALGRIND = valgrind --tool=memcheck -q
 DEBUG_KSP_VIEW = -ksp_view
 #gmres options
-GMRES_PRECISION = 1e-15
+GMRES_PRECISION = 1e-20
 GMRES_RESTART = ${RESTART_MAX}
 GMRES_NB_NODES = 1
 GMRES_MONITOR = -ksp_monitor_true_residual
 GMRES_FLAGS = -ksp_rtol 1e-100 -ksp_divtol 1e1000 -ksp_max_it 10000 -pc_type none -ksp_atol ${GMRES_PRECISION} -ksp_gmres_restart ${GMRES_RESTART}\
 		${GMRES_MONITOR} ${GMRES_VIEW} -lsa_gmres ${GMRES_NB_NODES} ${RESTART} ${ORTHOG}
 #arnoldi options
-ARNOLDI_PRECISION = 1e-15
+ARNOLDI_PRECISION = 1e-5
 ARNOLDI_NBEIGEN = 100
 ARNOLDI_NB_NODES = 1
 ARNOLDI_MONITOR = -eps_monitor
+#ARNOLDI_PLOT = -eps_plot_eigs
 #ARNOLDI_LOAD_ANY = -ksp_arnoldi_load_any
 ARNOLDI_FLAGS = -eps_type arnoldi -eps_true_residual -eps_largest_imaginary -eps_nev ${ARNOLDI_NBEIGEN} -eps_tol ${ARNOLDI_PRECISION} \
-		${ARNOLDI_MONITOR} -lsa_arnoldi ${ARNOLDI_NB_NODES} -eps_max_it 5  -ksp_arnoldi_cexport ${ARNOLDI_LOAD_ANY}
-#ls options
-LS_POWER = 30
+		${ARNOLDI_MONITOR} -lsa_arnoldi ${ARNOLDI_NB_NODES} -eps_max_it 50 -ksp_arnoldi_cexport ${ARNOLDI_LOAD_ANY} ${ARNOLDI_PLOT} -eps_view
+LS_POWER = 15
 LS_POLY_APPL = 11
-LS_LATENCY = 50
+LS_LATENCY = 10
 LS_PC_USE = 1
-LS_HANG_IT = 200
+LS_HANG_IT = 10000
 LS_HANG_TIME =  1
 
-#LS_LOAD_ANY = -ksp_ls_load_any
-LS_FLAGS = -ksp_ls_power ${LS_POWER} -ksp_ls_m_hang ${LS_HANG_IT} -ksp_ls_timing ${LS_HANG_TIME}  -ksp_ls_k_param ${LS_POLY_APPL} -ksp_ls_nopc ${LS_PC_USE} -ksp_ls_latency ${LS_LATENCY} -ksp_ls_cexport -ksp_ls_load lsqr.bin ${LS_LOAD_ANY}
+LS_LOAD_ANY = -ksp_ls_load_any
+LS_FLAGS = -ksp_ls_power ${LS_POWER} -ksp_ls_m_hang ${LS_HANG_IT} -ksp_ls_timing ${LS_HANG_TIME}  -ksp_ls_k_param ${LS_POLY_APPL} -ksp_ls_nopc ${LS_PC_USE} -ksp_ls_latency ${LS_LATENCY} -ksp_ls_cexport ${LS_LOAD_ANY}
 #final flag composition
 GLSA_FLAGS = ${DEBUGG} ${GMRES_FLAGS} ${ARNOLDI_FLAGS} ${LS_FLAGS} ${DEBUG_KSP_VIEW}
 MPI_NODES = ${shell echo ${GMRES_NB_NODES}+${ARNOLDI_NB_NODES}+2 | bc}

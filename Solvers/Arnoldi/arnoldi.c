@@ -15,18 +15,10 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 	Vec initialv,nullv,*vs;
 	PetscBool flag,data_load,data_export,continuous_export,load_any;
 	int exit_type=0;
-	FILE * ftest = NULL;
-	int descriptor;
 
 	sprintf(load_path,"./arnoldi.bin");
 	sprintf(export_path,"./arnoldi.bin");
 
-	if((ftest = fopen((char *)load_path, "r")) == NULL)
-	{
-		ierr=PetscBinaryOpen(load_path,FILE_MODE_WRITE,&descriptor);CHKERRQ(ierr);
-		ierr=PetscBinaryClose(descriptor);CHKERRQ(ierr);
-	}else fclose(ftest);
-	
 	/* create the eigensolver */
 	ierr=EPSCreate(PETSC_COMM_WORLD,&eps);CHKERRQ(ierr);
 	/* set the matrix operator */
@@ -34,7 +26,7 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 	/* set options */
 	ierr=EPSSetType(eps,EPSARNOLDI);
 	ierr=EPSSetFromOptions(eps);CHKERRQ(ierr);
-	ierr=EPSSetUp(eps);CHKERRQ(ierr);
+
 	/* duplicate vector properties */
 	ierr=VecDuplicate(*v,&initialv);CHKERRQ(ierr);
 	ierr=VecDuplicate(*v,&nullv);CHKERRQ(ierr);
@@ -49,19 +41,12 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 
 	ierr=PetscOptionsHasName(PETSC_NULL,"-ksp_arnoldi_load_any",&load_any);CHKERRQ(ierr);
 	ierr=PetscOptionsHasName(PETSC_NULL,"-ksp_arnoldi_cexport",&continuous_export);CHKERRQ(ierr);
-	load_any=PETSC_FALSE;
+
 	if(load_any) PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi loading default data file\n");
 	PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi path in= %s out= %s\n",load_path,export_path);
 
 	PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi allocating buffer of %d for invariant subspace\n",eigen_nb*2);
-	//vs=malloc(size*sizeof(Vec));
-	
-	//////////////////////////////////////		TRY TO DEBUG //////////////////////////////////
-	ierr = VecCreate(PETSC_COMM_WORLD, &vs);	CHKERRQ(ierr);
-	ierr = PetscMalloc(size, &vs);CHKERRQ(ierr);
-	
-	///////////////////////////////////////////////////////////////////////////////////////////
-	
+	vs=malloc(size*sizeof(Vec));
 	for(i=0;i<size;i++){
 		ierr=VecDuplicate(*v,&vs[i]);CHKERRQ(ierr);
 	}
@@ -175,7 +160,7 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 	for(i=0;i<eigen_nb;i++){
 		ierr=VecDestroy(&(vs[i]));CHKERRQ(ierr);
 	}
-	ierr=PetscFree(vs);CHKERRQ(ierr);
+//	ierr=PetscFree(vs);CHKERRQ(ierr);
 
 	/* and destroy the eps */
 	ierr=EPSDestroy(&eps);CHKERRQ(ierr);
