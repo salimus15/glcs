@@ -32,7 +32,8 @@ PetscErrorCode Father(com_lsa * com, Vec * v){
 		}		
 	}
 	
-	
+	ierr = VecDestroy(&vec_tmp_receive); CHKERRQ(ierr);
+	ierr = VecDestroy(&vec_tmp); CHKERRQ(ierr);
 	
 	
 	
