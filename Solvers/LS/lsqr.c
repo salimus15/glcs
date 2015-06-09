@@ -42,11 +42,11 @@ PetscErrorCode LSQR(com_lsa * com, int * vector_size){
 
 	ierr=PetscOptionsHasName(PETSC_NULL,"-ksp_ls_cexport",&continuous_export);CHKERRQ(ierr);
 
-// 	#ifdef DEBUG
-	    PetscPrintf(PETSC_COMM_WORLD,"@} LSQR args : eigen min %d eigen all %d param k %d\n",ls_eigen_min,ls_eigen,eigen_max);
-	    PetscPrintf(PETSC_COMM_WORLD,"@} LSQR args : loading data from file : %s\n",load_path);
-	    PetscPrintf(PETSC_COMM_WORLD,"@} LSQR args : exporting data to file : %s\n",export_path);
-// 	#endif
+/*// 	#ifdef DEBUG*/
+/*	    PetscPrintf(PETSC_COMM_WORLD,"@} LSQR args : eigen min %d eigen all %d param k %d\n",ls_eigen_min,ls_eigen,eigen_max);*/
+/*	    PetscPrintf(PETSC_COMM_WORLD,"@} LSQR args : loading data from file : %s\n",load_path);*/
+/*	    PetscPrintf(PETSC_COMM_WORLD,"@} LSQR args : exporting data to file : %s\n",export_path);*/
+/*// 	#endif*/
 
 	/* allocations */
 	ierr=PetscMalloc((*vector_size)*sizeof(PetscScalar),&eigen_tri);
@@ -100,24 +100,24 @@ PetscErrorCode LSQR(com_lsa * com, int * vector_size){
 			  data_load=PETSC_TRUE;
 			}
 			if(!(data_load^=data_load_any)){
-				#ifdef DEBUG
-				for(i=0;i<data_size;i++){
-					if(PetscImaginaryPart(data[i])!=0.0)
-					  printf("@} LSQR RECEIVED %d/%d : %e %e\n",i,data_size,PetscRealPart(data[i]),PetscImaginaryPart(data[i]));
-					else
-					  printf("@} LSQR RECEIVED Real %d/%d : %e\n",i,data_size,PetscRealPart(data[i]));
-				}
-				#endif
+/*				#ifdef DEBUG*/
+/*				for(i=0;i<data_size;i++){*/
+/*					if(PetscImaginaryPart(data[i])!=0.0)*/
+/*					  printf("@} LSQR RECEIVED %d/%d : %e %e\n",i,data_size,PetscRealPart(data[i]),PetscImaginaryPart(data[i]));*/
+/*					else*/
+/*					  printf("@} LSQR RECEIVED Real %d/%d : %e\n",i,data_size,PetscRealPart(data[i]));*/
+/*				}*/
+/*				#endif*/
 
 				/* first we gonna remove some non-needed values */
 				epurer(data,&data_size);
 
-				#ifdef DEBUG
-					printf("@} LSQR Epurer : retained %d values\n",data_size);
-					for(i=0;i<data_size;i++){
-					   printf("@} LSQR -> retained %e %e\n",PetscRealPart(data[i]),PetscImaginaryPart(data[i]));
-					}
-				#endif
+/*				#ifdef DEBUG*/
+/*					printf("@} LSQR Epurer : retained %d values\n",data_size);*/
+/*					for(i=0;i<data_size;i++){*/
+/*					   printf("@} LSQR -> retained %e %e\n",PetscRealPart(data[i]),PetscImaginaryPart(data[i]));*/
+/*					}*/
+/*				#endif*/
 
 				/* add them to the accumulated eigenvalues */
 				/* if full renew full eigenvalues */
@@ -136,26 +136,26 @@ PetscErrorCode LSQR(com_lsa * com, int * vector_size){
 					eigen_tri[i]=eigen_cumul[i];
 				}
 			} else {
-			  	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR Reading file %s\n",load_path);
+/*			  	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR Reading file %s\n",load_path);*/
 				ierr=readBinaryScalarArray(load_path,&cumul, eigen_tri);CHKERRQ(ierr);
 				data_load=PETSC_FALSE;
 				data_load_any=PETSC_FALSE;
 				data_size=cumul;
-				PetscPrintf(PETSC_COMM_WORLD,"@} LSQR Has Read %s\n",load_path);
+/*				PetscPrintf(PETSC_COMM_WORLD,"@} LSQR Has Read %s\n",load_path);*/
 			}
 
 
 
 			eigen_received+=data_size;
-			#ifdef DEBUG
-				printf("@} LSQR -> COMPARISON : r : %d  m : %d ()\n",eigen_received,ls_eigen_min);
-			#endif
+/*			#ifdef DEBUG*/
+/*				printf("@} LSQR -> COMPARISON : r : %d  m : %d ()\n",eigen_received,ls_eigen_min);*/
+/*			#endif*/
 			/* if we didn't received enough eigenvalues */
 			if(eigen_received<ls_eigen_min) continue;
 			else {
-				#ifdef DEBUG
-				PetscPrintf(PETSC_COMM_WORLD,"@} LSQR Enough good eigenvalues to compute the ellipse\n");
-				#endif
+/*				#ifdef DEBUG*/
+/*				PetscPrintf(PETSC_COMM_WORLD,"@} LSQR Enough good eigenvalues to compute the ellipse\n");*/
+/*				#endif*/
 				eigen_received=0;
 
 				tri(eigen_tri,cumul,&chsign);
@@ -163,52 +163,52 @@ PetscErrorCode LSQR(com_lsa * com, int * vector_size){
 				mu1=0;
 				mu2=0;
 
-				#ifdef DEBUG
-				printf("@} LSQR tri = %d %d\n",cumul,chsign);
-				for(i=0;i<cumul;i++){
-					#ifdef PETSC_USE_COMPLEX
-					printf("@} LSQR Values %d/%d-%d = %e %e\n",i,cumul,chsign,PetscRealPart(eigen_tri[i]),PetscImaginaryPart(eigen_tri[i]));
-					#else
-					printf("@} LSQR Values %d/%d-%d = %e \n",i,cumul,chsign,PetscRealPart(eigen_tri[i]));
-					#endif
-				}
-				#endif
+/*				#ifdef DEBUG*/
+/*				printf("@} LSQR tri = %d %d\n",cumul,chsign);*/
+/*				for(i=0;i<cumul;i++){*/
+/*					#ifdef PETSC_USE_COMPLEX*/
+/*					printf("@} LSQR Values %d/%d-%d = %e %e\n",i,cumul,chsign,PetscRealPart(eigen_tri[i]),PetscImaginaryPart(eigen_tri[i]));*/
+/*					#else*/
+/*					printf("@} LSQR Values %d/%d-%d = %e \n",i,cumul,chsign,PetscRealPart(eigen_tri[i]));*/
+/*					#endif*/
+/*				}*/
+/*				#endif*/
 
 				/* convex hull computation */
 				if(chsign>0){
 					convhull(eigen_tri, c, d, chsign, &mu1, 0, 0);
-					#ifdef DEBUG
-					printf("@} LSQR convhul negatif chsigne %d cumul %d mu1 %d\n",chsign,cumul,mu1);
-					#endif
+/*					#ifdef DEBUG*/
+/*					printf("@} LSQR convhul negatif chsigne %d cumul %d mu1 %d\n",chsign,cumul,mu1);*/
+/*					#endif*/
 				}
 				if(chsign<cumul){
 
 
 					convhull(eigen_tri, c, d, cumul-chsign, &mu2, chsign, mu1);
-					#ifdef DEBUG
-					printf("@} LSQR convhul positif chsigne %d cumul %d mu1 %d mu2 %d\n",chsign,cumul,mu1,mu2);
-					#endif
+/*					#ifdef DEBUG*/
+/*					printf("@} LSQR convhul positif chsigne %d cumul %d mu1 %d mu2 %d\n",chsign,cumul,mu1,mu2);*/
+/*					#endif*/
 				}
 				mu=mu1+mu2;
-				#ifdef DEBUG
-					printf("@} LSQR cumul-chsign=%d mu2=%d chsign=%d mu=%d\n",cumul-chsign, mu2, chsign, mu1);
-					for(i=0;i<cumul;i++){
-					    printf("@} LSQR Values c[%d]=%e %e\n",i,PetscRealPart(c[i]),PetscImaginaryPart(c[i]));
-					}
-					for(i=0;i<cumul;i++){
-					    printf("@} LSQR Values d[%d]=%e %e\n",i,PetscRealPart(d[i]),PetscImaginaryPart(d[i]));
-					}
-				#endif
-				#ifdef DEBUG
-					PetscPrintf(PETSC_COMM_WORLD,"@} LSQR Params Ellipse %d %d %d\n",mu, mu1,mu2);
-				#endif
+/*				#ifdef DEBUG*/
+/*					printf("@} LSQR cumul-chsign=%d mu2=%d chsign=%d mu=%d\n",cumul-chsign, mu2, chsign, mu1);*/
+/*					for(i=0;i<cumul;i++){*/
+/*					    printf("@} LSQR Values c[%d]=%e %e\n",i,PetscRealPart(c[i]),PetscImaginaryPart(c[i]));*/
+/*					}*/
+/*					for(i=0;i<cumul;i++){*/
+/*					    printf("@} LSQR Values d[%d]=%e %e\n",i,PetscRealPart(d[i]),PetscImaginaryPart(d[i]));*/
+/*					}*/
+/*				#endif*/
+/*				#ifdef DEBUG*/
+/*					PetscPrintf(PETSC_COMM_WORLD,"@} LSQR Params Ellipse %d %d %d\n",mu, mu1,mu2);*/
+/*				#endif*/
 
 				/* Ellipse computation */
 				ierr=ellipse(c,  d, mu+1, mu1, &c_ell, &a_ell, &d_ell, &d_reel, &info);CHKERRQ(ierr);
 
-				#ifdef DEBUG
-					PetscPrintf(PETSC_COMM_WORLD,"@} LSQR Ellipse computed %e %e %e %e\n",c_ell, a_ell, d_ell, d_reel);
-				#endif
+/*				#ifdef DEBUG*/
+/*					PetscPrintf(PETSC_COMM_WORLD,"@} LSQR Ellipse computed %e %e %e %e\n",c_ell, a_ell, d_ell, d_reel);*/
+/*				#endif*/
 
 				if(fabs(d_ell)<epsilon()) d_ell = 1.;
 
@@ -225,17 +225,17 @@ PetscErrorCode LSQR(com_lsa * com, int * vector_size){
 
 
 		if(ls_eigen>1){
-			#ifdef DEBUG
-			PetscPrintf(PETSC_COMM_WORLD,"@} LSQR Sending parameters to Father %d\n",ls_eigen);
-			#endif
+/*			#ifdef DEBUG*/
+/*			PetscPrintf(PETSC_COMM_WORLD,"@} LSQR Sending parameters to Father %d\n",ls_eigen);*/
+/*			#endif*/
 
 			/* place the computed results inside the array */
 			scalar_tmp=(PetscScalar)ls_eigen;
 			for(i=0;i<ls_eigen;i++){
-			    PetscPrintf(PETSC_COMM_WORLD,"@} %d LSQR eta[%d]=%e %e beta[%d]=%e %e delta[%d]=%e %e\n",ls_eigen,
-			      i,PetscRealPart(eta[i]),PetscImaginaryPart(eta[i]),
-			      i,PetscRealPart(beta[i]),PetscImaginaryPart(beta[i]),
-			      i,PetscRealPart(delta[i]),PetscImaginaryPart(delta[i]));
+/*			    PetscPrintf(PETSC_COMM_WORLD,"@} %d LSQR eta[%d]=%e %e beta[%d]=%e %e delta[%d]=%e %e\n",ls_eigen,*/
+/*			      i,PetscRealPart(eta[i]),PetscImaginaryPart(eta[i]),*/
+/*			      i,PetscRealPart(beta[i]),PetscImaginaryPart(beta[i]),*/
+/*			      i,PetscRealPart(delta[i]),PetscImaginaryPart(delta[i]));*/
 			}
 
 			ierr=PetscMemcpy(&result_array[0],&scalar_tmp,1*sizeof(PetscScalar));CHKERRQ(ierr);

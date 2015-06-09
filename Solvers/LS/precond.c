@@ -53,12 +53,12 @@ PetscErrorCode LSPrecond(PetscReal a_ell, PetscReal d_ell, PetscReal c_ell,
 	}
 	*alpha=c_ell;
 
-	#ifdef DEBUG
-	for(i=0;i<*nb_eigen_all;i++){
-	  PetscPrintf(PETSC_COMM_WORLD,"@} LSQR beta[%d]=%e delta[%d]=%e \n",i,(PetscReal)beta[i],i,(PetscReal)delta[i]);
-	}
-	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => COMPUTING M MATRIX\n");
-	#endif
+/*	#ifdef DEBUG*/
+/*	for(i=0;i<*nb_eigen_all;i++){*/
+/*	  PetscPrintf(PETSC_COMM_WORLD,"@} LSQR beta[%d]=%e delta[%d]=%e \n",i,(PetscReal)beta[i],i,(PetscReal)delta[i]);*/
+/*	}*/
+/*	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => COMPUTING M MATRIX\n");*/
+/*	#endif*/
 
 
 
@@ -130,14 +130,14 @@ PetscErrorCode LSPrecond(PetscReal a_ell, PetscReal d_ell, PetscReal c_ell,
 	MatAssemblyBegin(MM,MAT_FINAL_ASSEMBLY);
 	MatAssemblyEnd(MM,MAT_FINAL_ASSEMBLY);
 
-	#ifdef DEBUGDATA
-	PetscViewerSetFormat(PETSC_VIEWER_STDOUT_WORLD,PETSC_VIEWER_ASCII_MATLAB );
- 	MatView(MM,PETSC_VIEWER_STDOUT_WORLD);
-	#endif
+/*	#ifdef DEBUGDATA*/
+/*	PetscViewerSetFormat(PETSC_VIEWER_STDOUT_WORLD,PETSC_VIEWER_ASCII_MATLAB );*/
+/* 	MatView(MM,PETSC_VIEWER_STDOUT_WORLD);*/
+/*	#endif*/
 
-	#ifdef DEBUG
-	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => PROCESSING TO CHOLESKY FACTORIZATION\n");
-	#endif
+/*	#ifdef DEBUG*/
+/*	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => PROCESSING TO CHOLESKY FACTORIZATION\n");*/
+/*	#endif*/
 
 	/*proceed to factorization*/
 	ierr=KSPCreate(PETSC_COMM_WORLD,&kspchol);CHKERRQ(ierr);
@@ -147,9 +147,9 @@ PetscErrorCode LSPrecond(PetscReal a_ell, PetscReal d_ell, PetscReal c_ell,
 	ierr=PCSetType(pcchol,PCCHOLESKY);CHKERRQ(ierr);
 	ierr=KSPSetUp(kspchol);CHKERRQ(ierr);
 
-	#ifdef DEBUG
-	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => CHOLESKY DONE, EXTRACTING FACTORIZED MATRIX\n");
-	#endif
+/*	#ifdef DEBUG*/
+/*	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => CHOLESKY DONE, EXTRACTING FACTORIZED MATRIX\n");*/
+/*	#endif*/
 	/*get factor matrix*/
 	MatCreateSeqDense(PETSC_COMM_WORLD,(*nb_eigen_all)+1,(*nb_eigen_all)+1,PETSC_NULL,&fact);
 	// MatSetFromOptions(fact);
@@ -162,20 +162,20 @@ PetscErrorCode LSPrecond(PetscReal a_ell, PetscReal d_ell, PetscReal c_ell,
  	MatView(fact,PETSC_VIEWER_STDOUT_WORLD);
 	#endif
 
-	#ifdef DEBUG
-	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => CREATING F MATRIX\n");
-	#endif
+/*	#ifdef DEBUG*/
+/*	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => CREATING F MATRIX\n");*/
+/*	#endif*/
 
 	/*Create the matrix operator that will be used in the QR factorization*/
 	MatCreateSeqDense(PETSC_COMM_WORLD,(*nb_eigen)+1,(*nb_eigen),PETSC_NULL,&F);
 
-	#ifdef DEBUG
-	for(j=0;j<*nb_eigen;j++){
-	  PetscPrintf(PETSC_COMM_WORLD,"@} LSQR beta[%d]=%e delta[%d]=%e alpha=%e\n",
-	    j,(PetscReal)beta[j],j,(PetscReal)delta[j],(PetscReal)*alpha
-	  );
-	}
-	#endif
+/*	#ifdef DEBUG*/
+/*	for(j=0;j<*nb_eigen;j++){*/
+/*	  PetscPrintf(PETSC_COMM_WORLD,"@} LSQR beta[%d]=%e delta[%d]=%e alpha=%e\n",*/
+/*	    j,(PetscReal)beta[j],j,(PetscReal)delta[j],(PetscReal)*alpha*/
+/*	  );*/
+/*	}*/
+/*	#endif*/
 
 	/*get matrix array, fact is of dense format so wouldn't be a problem for addressing*/
 	ierr=MatSeqAIJGetArray(fact,&fact_tmp);CHKERRQ(ierr);
