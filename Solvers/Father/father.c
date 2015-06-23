@@ -25,6 +25,7 @@ PetscErrorCode Father(com_lsa * com, Vec * v){
 		}
 		/* check if there's an incoming message */
 		if(!mpi_lsa_com_vec_recv(com, &vec_tmp_receive)){
+			 PetscPrintf(PETSC_COMM_WORLD,"$} ######### SOMETHING IS IN WE GONNA CHECK IT ##########\n");
 			if(!mpi_lsa_com_vec_recv_validate(com, &vec_tmp_receive)){
 				vec_tmp=vec_tmp_receive;
 				mpi_lsa_com_vec_send(com,&vec_tmp);

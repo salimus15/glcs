@@ -28,9 +28,9 @@ int mpi_lsa_init(int argc, char ** argv, com_lsa * com){
 
 	/* put the groups sizes into lsa struct */
 	/* choice of ordering is arbitrarly made */
-	com->size.com[0]=lsa_gmres;
+	com->size.com[0]=lsa_gmres;	//ici lsa_gmres est non-initialisé
 	com->size.com[1]=lsa_father;
-	com->size.com[2]=lsa_arnoldi;
+	com->size.com[2]=lsa_arnoldi;	//ici lsa_arnoldi est non-initialisé
 	com->size.com[3]=lsa_ls;
 
 	if(com->rank_world==0)printf("]> Creating Groups\n");

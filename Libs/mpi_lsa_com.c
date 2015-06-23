@@ -172,7 +172,6 @@ int mpi_lsa_com_vec_send(com_lsa * com, Vec * v){
 
 	/* restore array */
 	ierr=VecRestoreArray(*v,&array);CHKERRQ(ierr);
-
 	return 0;
 }
 

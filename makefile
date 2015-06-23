@@ -20,7 +20,7 @@ MDIR=./data
 ##################################################################
 
 RESTART_MAX=  100
-RESTART_MIN=  30
+RESTART_MIN=  3
 RESTART_INCREMENT = 3
 RESTART_STRATEGY = none
 RESTART_FULL_TYPE = none
@@ -42,26 +42,25 @@ GMRES_PRECISION = 1e-20
 GMRES_RESTART = ${RESTART_MAX}
 GMRES_NB_NODES = 1
 GMRES_MONITOR = -ksp_monitor_true_residual
-GMRES_FLAGS = -ksp_rtol 1e-100 -ksp_divtol 1e1000 -ksp_max_it 5000 -pc_type none -ksp_atol ${GMRES_PRECISION} -ksp_gmres_restart ${GMRES_RESTART}\
+GMRES_FLAGS = -ksp_rtol 1e-100 -ksp_divtol 1e1000 -ksp_max_it 10000 -pc_type none -ksp_atol ${GMRES_PRECISION} -ksp_gmres_restart ${GMRES_RESTART}\
 		${GMRES_MONITOR} ${GMRES_VIEW} -lsa_gmres ${GMRES_NB_NODES} ${RESTART} ${ORTHOG}
 #arnoldi options
 ARNOLDI_PRECISION = 1e-5
-ARNOLDI_NBEIGEN = 10
+ARNOLDI_NBEIGEN = 100
 ARNOLDI_NB_NODES = 1
-#ARNOLDI_MONITOR = -eps_monitor
-#ARNOLDI_PLOT = -eps_plot_eigs
-#ARNOLDI_LOAD_ANY = -ksp_arnoldi_load_any
+ARNOLDI_MONITOR = -eps_monitor
+# ARNOLDI_LOAD_ANY = -ksp_arnoldi_load_any
 ARNOLDI_FLAGS = -eps_type arnoldi -eps_true_residual -eps_largest_imaginary -eps_nev ${ARNOLDI_NBEIGEN} -eps_tol ${ARNOLDI_PRECISION} \
-		${ARNOLDI_MONITOR} -lsa_arnoldi ${ARNOLDI_NB_NODES} -eps_max_it 5 -ksp_arnoldi_cexport ${ARNOLDI_LOAD_ANY} ${ARNOLDI_PLOT} -eps_view
+		${ARNOLDI_MONITOR} -lsa_arnoldi ${ARNOLDI_NB_NODES} -eps_max_it 5 -ksp_arnoldi_cexport ${ARNOLDI_LOAD_ANY}
+#ls options
 LS_POWER = 15
 LS_POLY_APPL = 11
-LS_LATENCY = 200
+LS_LATENCY = 20
 LS_PC_USE = 1
-LS_HANG_IT = 10000
-LS_HANG_TIME =  200
-
-#LS_LOAD_ANY = -ksp_ls_load_any
-LS_FLAGS = -ksp_ls_power ${LS_POWER} -ksp_ls_m_hang ${LS_HANG_IT} -ksp_ls_timing ${LS_HANG_TIME}  -ksp_ls_k_param ${LS_POLY_APPL} -ksp_ls_nopc ${LS_PC_USE} -ksp_ls_latency ${LS_LATENCY} -ksp_ls_cexport ${LS_LOAD_ANY} !${DEBUG}
+LS_HANG_IT = 2000
+LS_HANG_TIME =  1
+# LS_LOAD_ANY = -ksp_ls_load_any
+LS_FLAGS = -ksp_ls_power ${LS_POWER} -ksp_ls_m_hang ${LS_HANG_IT} -ksp_ls_timing ${LS_HANG_TIME}  -ksp_ls_k_param ${LS_POLY_APPL} -ksp_ls_nopc ${LS_PC_USE} -ksp_ls_latency ${LS_LATENCY} -ksp_ls_cexport ${LS_LOAD_ANY}
 #final flag composition
 GLSA_FLAGS = ${DEBUGG} ${GMRES_FLAGS} ${ARNOLDI_FLAGS} ${LS_FLAGS} ${DEBUG_KSP_VIEW}
 MPI_NODES = ${shell echo ${GMRES_NB_NODES}+${ARNOLDI_NB_NODES}+2 | bc}
@@ -126,14 +125,9 @@ effacer :
 ##################################################################
 ##################     Execution Rules     #######################
 ##################################################################
-<<<<<<< HEAD
 #valgrind --sigill-diagnostics=yes --show-below-main=yes --leak-check=full --show-leak-kinds=all
 runl:
 	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
-=======
-runs:
-	-valgrind --leak-check=full --show-reachable=yes ${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
->>>>>>> e86a0e037422ada66bf4f5ec1ddae78f912e4fff
 	-mfile ${MDIR}/young4c.mtx_841x841_4089nnz \
 	2>&1 | tee log.txt
 	
@@ -143,7 +137,7 @@ runs:
 	2>&1 | tee log.txt
 
 runx:
-	 -valgrind --leak-check=full --show-reachable=yes 																${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND}  ./hyperh ${GLSA_FLAGS} \
+	 ${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND}  ./hyperh ${GLSA_FLAGS} \
 	-mfile ${MDIR}/waveguide3D.mtx_21036x21036_303468nnz  \
 	-vfile ${MDIR}/waveguide3D_b.mtx_21036 \
 	2>&1 | tee log.txt

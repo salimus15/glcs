@@ -178,7 +178,8 @@ PetscErrorCode LSPrecond(PetscReal a_ell, PetscReal d_ell, PetscReal c_ell,
 /*	#endif*/
 
 	/*get matrix array, fact is of dense format so wouldn't be a problem for addressing*/
-	ierr=MatSeqAIJGetArray(fact,&fact_tmp);CHKERRQ(ierr);
+//	ierr=MatSeqAIJGetArray(fact,&fact_tmp);CHKERRQ(ierr);
+	ierr=MatDenseGetArray(fact,&fact_tmp);CHKERRQ(ierr);
 	MatSetValue(F,0,0,(PetscReal)(*alpha)*(PetscReal)fact_tmp[0]+(PetscReal)beta[0]*(PetscReal)fact_tmp[1],INSERT_VALUES);
 	MatSetValue(F,1,0,(PetscReal)beta[0]*(PetscReal)fact_tmp[1+((*nb_eigen_all)+1)],INSERT_VALUES);
 
@@ -211,7 +212,8 @@ PetscErrorCode LSPrecond(PetscReal a_ell, PetscReal d_ell, PetscReal c_ell,
 	ierr = VecAssemblyEnd(rhs);CHKERRQ(ierr);
 
 	/*no longer need to access factored matrix, restore it*/
-	ierr=MatSeqAIJRestoreArray(fact,&fact_tmp);CHKERRQ(ierr);
+//	ierr=MatSeqAIJRestoreArray(fact,&fact_tmp);CHKERRQ(ierr);
+	ierr=MatDenseRestoreArray(fact,&fact_tmp);CHKERRQ(ierr);
 
 	/*assemble F for processing*/
 	MatAssemblyBegin(F,MAT_FINAL_ASSEMBLY);
