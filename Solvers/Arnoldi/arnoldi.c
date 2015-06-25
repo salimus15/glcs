@@ -15,9 +15,19 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 	Vec initialv,nullv,*vs;
 	PetscBool flag,data_load,data_export,continuous_export,load_any;
 	int exit_type=0;
+	FILE * ftest = NULL;
+	int descriptor;
 
+
+	    PetscPrintf(PETSC_COMM_WORLD,"$}### ARNOLDI mr rank : %d my group : %d my color : %d  I send to %d  and receive fom %d\n",com->rank_world, com->com_group,com->color_group,com->in_com,com->out_com);
 	sprintf(load_path,"./arnoldi.bin");
 	sprintf(export_path,"./arnoldi.bin");
+	
+	if((ftest = fopen((char *)load_path, "r")) == NULL)
+	{
+		ierr=PetscBinaryOpen(load_path,FILE_MODE_WRITE,&descriptor);CHKERRQ(ierr);
+		ierr=PetscBinaryClose(descriptor);CHKERRQ(ierr);
+	}else fclose(ftest);
 
 	/* create the eigensolver */
 	ierr=EPSCreate(PETSC_COMM_WORLD,&eps);CHKERRQ(ierr);
@@ -160,7 +170,7 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 	for(i=0;i<eigen_nb;i++){
 		ierr=VecDestroy(&(vs[i]));CHKERRQ(ierr);
 	}
-//	ierr=PetscFree(vs);CHKERRQ(ierr);
+	ierr=PetscFree(vs);CHKERRQ(ierr);
 
 	/* and destroy the eps */
 	ierr=EPSDestroy(&eps);CHKERRQ(ierr);

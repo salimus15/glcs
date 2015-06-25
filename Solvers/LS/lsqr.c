@@ -18,6 +18,7 @@ PetscErrorCode LSQR(com_lsa * com, int * vector_size){
  	PetscScalar * result_array,*data_buffer;/*[EIGEN_ALL*3+2]*/
 	FILE * ftest = NULL;
 	int descriptor;
+	  PetscPrintf(PETSC_COMM_WORLD,"$}### LSQR mr rank : %d my group : %d my color : %d  I send to %d  and receive fom %d\n",com->rank_world, com->com_group,com->color_group,com->in_com,com->out_com);
 	sprintf(load_path,"./lsqr.bin");
 	sprintf(export_path,"./lsqr.bin");
 	

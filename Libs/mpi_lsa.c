@@ -41,7 +41,7 @@ int mpi_lsa_init(int argc, char ** argv, com_lsa * com){
 	mpi_lsa_create_intercoms(com);
 
 	if(com->rank_world==0)printf("]> MPI communications ready to be used\n");
-
+printf("!!!!!!!!!!> i am rank %d my group : %d\n",com->rank_world,com->com_group);
 	return 0;
 }
 
@@ -51,6 +51,7 @@ int mpi_lsa_create_groups(com_lsa * com){
 
 	/* get the color */
 	/* get the id of the first process for a group */
+	// ici on récupére juste le rang du master( premier du group) pour chaque group (rang dans MPI_COMM_WORLD)
 	for(i=0;i<4;i++){
 		tmp_int=0;
 		for(j=0;j<i;j++){
@@ -65,21 +66,28 @@ int mpi_lsa_create_groups(com_lsa * com){
 	//
 	/* now get the color for each group*/
 	/* groups are colored from 1 to x */
+	// illa_khir
+	
 	tmp_int=0;
 	for(i=0;i<4;i++){
 		if(com->rank_world>=com->master.com[i]){
 			com->color_group=i;
+			
 		}
+		
 	}
-
+	printf("========> i am rank %d my color goup : %d\n",com->rank_world,com->color_group);
 	MPI_Barrier(MPI_COMM_WORLD);
 
 
 	/* create a communicator for each group of subprocess */
+	// we create as many groups as there are distinct values for color
+	// the rank of the process in the group depends on its rank in comm_wold "com->rank_world"
+	// the group to wich belongs the process is saved in com->com_group
 	MPI_Comm_split(MPI_COMM_WORLD,com->color_group,com->rank_world,&com->com_group);
 	MPI_Comm_rank(com->com_group,&com->rank_group);
-	MPI_Comm_size(com->com_group,&tmp_int);
-
+	MPI_Comm_size(com->com_group,&tmp_int);	// ??????????????????!!!!!!!!!!!!!!!!!!!!!!!!!
+	
 	return 0;
 }
 
@@ -118,7 +126,7 @@ int mpi_lsa_create_intercoms(com_lsa * com){
 	 										 com->rank_group,&(com->inter.com[(4-((com->color_group)-1)%4)%4]));
 
 
-
+	/// WHY THIS ????????
 	if((4-(com->color_group-1)%4)%4>com->color_group){
 		next=(4-(com->color_group-1)%4)%4;
 		prev=4-((com->color_group)+1);

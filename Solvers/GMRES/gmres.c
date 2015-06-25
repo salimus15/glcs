@@ -6,8 +6,7 @@ PetscErrorCode launchGMRES(com_lsa * com, Vec * b, Mat * A){
 	KSP ksp;
 	Vec x;
 	KSPConvergedReason reason;
-
-
+	   PetscPrintf(PETSC_COMM_WORLD,"$}### GMRES mr rank : %d my group : %d my color : %d  I send to %d  and receive fom %d\n",com->rank_world, com->com_group,com->color_group,com->in_com,com->out_com);
 	PetscPrintf(com->com_group,"#} GMRES Creating and setting vector x\n");
 
 	ierr = VecDuplicate(*b, &x);CHKERRQ(ierr);

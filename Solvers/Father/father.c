@@ -9,7 +9,7 @@ PetscErrorCode Father(com_lsa * com, Vec * v){
 	PetscErrorCode ierr;	
 	int exit_type=0;	
 	end=0;
-	
+ PetscPrintf(PETSC_COMM_WORLD,"$}### FATHER mr rank : %d my group : %d my color : %d  I send to %d  and receive fom %d\n",com->rank_world, com->com_group,com->color_group,com->in_com,com->out_com);
 	ierr=VecDuplicate(*v,&vec_tmp);CHKERRQ(ierr);
 	ierr=VecDuplicate(*v,&vec_tmp_receive);CHKERRQ(ierr);
 	

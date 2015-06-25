@@ -15,12 +15,12 @@
 
 
 typedef struct _com_lsa{
-	int com_world;
+	int com_world;	// MPI_COMM_WORLD
 
 	union {
 		int com[4];
 		int gmres,father,arnoldi,ls;
-	}group;
+	}group; 
 
 	union {
 		int com[4];
@@ -30,19 +30,19 @@ typedef struct _com_lsa{
 	union {
 		int com[4];
 		int gmres,father,arnoldi,ls;
-	} size;
+	} size;	// groups size
 
 	union {
 		int com[4];
 		int gmres,father,arnoldi,ls;
 	} master;
 
-	int size_world;
-	int com_group;
-	int rank_group;
-	int color_group;
+	int size_world;	// size of MPI_COMM_WORLD
+	int com_group;		// group to which belongs the process
+	int rank_group;	//rank in the group
+	int color_group;	// the colo of the goup to which belongs the pocess
 
-	int rank_world;
+	int rank_world;	// rank in world 
 
 	int * in_size;
 	int * out_size;
