@@ -1,7 +1,7 @@
 #CREATED BY PIERRE-YVES AQUILANTI 2011*/
 ALL: all
 
-CFLAGS   =  -I${SLEPC_DIR}/include/private/ -I${SLEPC_DIR}/include -DDEBUG ${PETSC_CC_INCLUDES} -I${SLEPC_DIR}/linux-c-debug-complex/include ${SLEPC_LIB}
+CFLAGS   =  -I${SLEPC_DIR}/include/private/ -I${SLEPC_DIR}/include -DDEBUG ${PETSC_CC_INCLUDES} -I${SLEPC_DIR}/${PETSC_ARCH}/include ${SLEPC_LIB}
 SOURCEC  =  arnoldi.c
 SOURCEH  =  arnoldi.h
 CLEANFILE    = arnoldi.o
