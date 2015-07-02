@@ -9,7 +9,7 @@ PetscErrorCode Father(com_lsa * com, Vec * v){
 	PetscErrorCode ierr;	
 	int exit_type=0;	
 	end=0;
- PetscPrintf(PETSC_COMM_WORLD,"$}### FATHER mr rank : %d my group : %d my color : %d  I send to %d  and receive fom %d\n",com->rank_world, com->com_group,com->color_group,com->in_com,com->out_com);
+	
 	ierr=VecDuplicate(*v,&vec_tmp);CHKERRQ(ierr);
 	ierr=VecDuplicate(*v,&vec_tmp_receive);CHKERRQ(ierr);
 	
@@ -25,7 +25,6 @@ PetscErrorCode Father(com_lsa * com, Vec * v){
 		}
 		/* check if there's an incoming message */
 		if(!mpi_lsa_com_vec_recv(com, &vec_tmp_receive)){
-			 PetscPrintf(PETSC_COMM_WORLD,"$} ######### SOMETHING IS IN WE GONNA CHECK IT ##########\n");
 			if(!mpi_lsa_com_vec_recv_validate(com, &vec_tmp_receive)){
 				vec_tmp=vec_tmp_receive;
 				mpi_lsa_com_vec_send(com,&vec_tmp);
@@ -33,8 +32,7 @@ PetscErrorCode Father(com_lsa * com, Vec * v){
 		}		
 	}
 	
-	ierr = VecDestroy(&vec_tmp_receive); CHKERRQ(ierr);
-	ierr = VecDestroy(&vec_tmp); CHKERRQ(ierr);
+	
 	
 	
 	

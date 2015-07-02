@@ -5,7 +5,7 @@
 /* just one include necessary */
 #include "fgmresimpl.h"
 #include "petsc.h"
-#include "petsc-private/kspimpl.h"
+#include "petsc/private/kspimpl.h"
 
 
 PetscErrorCode MyKSPFGMRESCycle(PetscInt *itcount,KSP ksp);

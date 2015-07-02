@@ -41,7 +41,7 @@ int mpi_lsa_init(int argc, char ** argv, com_lsa * com){
 	mpi_lsa_create_intercoms(com);
 
 	if(com->rank_world==0)printf("]> MPI communications ready to be used\n");
-printf("!!!!!!!!!!> i am rank %d my group : %d\n",com->rank_world,com->com_group);
+/*printf("!!!!!!!!!!> i am rank %d my group : %d\n",com->rank_world,com->com_group);*/
 	return 0;
 }
 
@@ -94,7 +94,7 @@ int mpi_lsa_create_groups(com_lsa * com){
 /* create intercommunicators between intracoms */
 /* create a loop between all the elements types */
 int mpi_lsa_create_intercoms(com_lsa * com){
-	int prev, next;
+	int prev, next,flag;
 	int prev_size,next_size,size;
 	/* create first connection between intracommunicators thanks to an intercommunicator */
 	/* one way */
@@ -106,11 +106,13 @@ int mpi_lsa_create_intercoms(com_lsa * com){
 
 
 
-	MPI_Intercomm_create(com->com_group,0,MPI_COMM_WORLD,com->master.com[4-((com->color_group)+1)],
-											 com->rank_group,&(com->inter.com[4-((com->color_group)+1)]));
+	MPI_Intercomm_create(com->com_group,0,
+					MPI_COMM_WORLD,com->master.com[4-((com->color_group)+1)], 
+					com->rank_group,
+					&(com->inter.com[4-((com->color_group)+1)]));
 
 
-
+	
 	MPI_Barrier(MPI_COMM_WORLD);
 	if(com->rank_world==0)printf("\n]> The Other : \n");
 	MPI_Barrier(MPI_COMM_WORLD);
@@ -122,12 +124,14 @@ int mpi_lsa_create_intercoms(com_lsa * com){
 
 
  	/* the other */
-	MPI_Intercomm_create(com->com_group,0,com->com_world,com->master.com[(4-((com->color_group)-1)%4)%4],
-	 										 com->rank_group,&(com->inter.com[(4-((com->color_group)-1)%4)%4]));
+	MPI_Intercomm_create(com->com_group,0,
+					 com->com_world,com->master.com[(4-((com->color_group)-1)%4)%4],
+	 				com->rank_group,
+	 				&(com->inter.com[(4-((com->color_group)-1)%4)%4]));
 
 
 	/// WHY THIS ????????
-	if((4-(com->color_group-1)%4)%4>com->color_group){
+	if((4-((com->color_group)-1)%4)%4>com->color_group){
 		next=(4-(com->color_group-1)%4)%4;
 		prev=4-((com->color_group)+1);
 	} else {
@@ -137,12 +141,20 @@ int mpi_lsa_create_intercoms(com_lsa * com){
 
 	/* set the in and out communicators */
 	com->out_com=com->inter.com[next];
+	MPI_Comm_test_inter(com->inter.com[next],&flag);
+		if(!flag){
+			mpi_lsa_print("\n\n\n\nproblem with inter.[next]\n\n\n\n\n", com);
+		}
 	com->in_com=com->inter.com[prev];
+		MPI_Comm_test_inter(com->inter.com[prev],&flag);
+		if(!flag){
+			mpi_lsa_print("\n\n\n\n\nproblem with inter.[prev]\n\n\n\n", com);
+		}
 
 	MPI_Comm_remote_size(com->out_com,&next_size);
 	MPI_Comm_remote_size(com->in_com,&prev_size);
 	MPI_Comm_size(com->com_group,&size);
-
+	if(com->color_group==0) 		 printf("GMRES 1: my intercomm with LS %d \n",com->in_com);
 	if(com->rank_world==0) printf("]> In and Out communicators : \n");
 		MPI_Barrier(MPI_COMM_WORLD);
 
@@ -151,7 +163,7 @@ int mpi_lsa_create_intercoms(com_lsa * com){
 	else if(com->color_group==2) printf("ARNOLDI : ");
 	else if(com->color_group==3) printf("LS :      ");
 
-	printf("%d: %d (%d) -> %d (%d) -> %d (%d)\n",com->rank_world,prev,prev_size,com->color_group,size,next,next_size);
+	printf("%d: %d (%d) -> %d (%d) -> %d (%d)\n",com->rank_world,com->master.com[prev],prev_size,com->color_group,size,com->master.com[next],next_size);
 
 	return 0;
 }

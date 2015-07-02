@@ -15,6 +15,7 @@ OFILES= ${wildcard ./Libs/*.o} ${wildcard ./Solvers/*/*.o} ${wildcard ./Tuning/*
 MDIR=./data
 #MDIR=/home/pyaquilanti/Data/Matrices
 
+
 ##################################################################
 ##################      Tuning  FLAGS      #######################
 ##################################################################
@@ -42,37 +43,39 @@ GMRES_PRECISION = 1e-20
 GMRES_RESTART = ${RESTART_MAX}
 GMRES_NB_NODES = 1
 GMRES_MONITOR = -ksp_monitor_true_residual
-GMRES_FLAGS = -ksp_rtol 1e-100 -ksp_divtol 1e1000 -ksp_max_it 10000 -pc_type none -ksp_atol ${GMRES_PRECISION} -ksp_gmres_restart ${GMRES_RESTART}\
+GMRES_FLAGS = -ksp_rtol 1e-100 -ksp_divtol 1e1000 -ksp_max_it 5000 -pc_type none -ksp_atol ${GMRES_PRECISION} -ksp_gmres_restart ${GMRES_RESTART}\
 		${GMRES_MONITOR} ${GMRES_VIEW} -lsa_gmres ${GMRES_NB_NODES} ${RESTART} ${ORTHOG}
 #arnoldi options
 ARNOLDI_PRECISION = 1e-5
 ARNOLDI_NBEIGEN = 100
 ARNOLDI_NB_NODES = 1
-ARNOLDI_MONITOR = -eps_monitor
+#ARNOLDI_MONITOR = -eps_monitor
 # ARNOLDI_LOAD_ANY = -ksp_arnoldi_load_any
 ARNOLDI_FLAGS = -eps_type arnoldi -eps_true_residual -eps_largest_imaginary -eps_nev ${ARNOLDI_NBEIGEN} -eps_tol ${ARNOLDI_PRECISION} \
 		${ARNOLDI_MONITOR} -lsa_arnoldi ${ARNOLDI_NB_NODES} -eps_max_it 5 -ksp_arnoldi_cexport ${ARNOLDI_LOAD_ANY}
 #ls options
 LS_POWER = 15
 LS_POLY_APPL = 11
-LS_LATENCY = 20
+LS_LATENCY = 200
 LS_PC_USE = 1
-LS_HANG_IT = 2000
+LS_HANG_IT = 5000
 LS_HANG_TIME =  1
 # LS_LOAD_ANY = -ksp_ls_load_any
 LS_FLAGS = -ksp_ls_power ${LS_POWER} -ksp_ls_m_hang ${LS_HANG_IT} -ksp_ls_timing ${LS_HANG_TIME}  -ksp_ls_k_param ${LS_POLY_APPL} -ksp_ls_nopc ${LS_PC_USE} -ksp_ls_latency ${LS_LATENCY} -ksp_ls_cexport ${LS_LOAD_ANY}
-#final flag composition
-GLSA_FLAGS = ${DEBUGG} ${GMRES_FLAGS} ${ARNOLDI_FLAGS} ${LS_FLAGS} ${DEBUG_KSP_VIEW}
+#final flag composition  ${DEBUGG}
+GLSA_FLAGS = ${GMRES_FLAGS} ${ARNOLDI_FLAGS} ${LS_FLAGS} ${DEBUG_KSP_VIEW}
 MPI_NODES = ${shell echo ${GMRES_NB_NODES}+${ARNOLDI_NB_NODES}+2 | bc}
+
+
 
 ##################################################################
 ##################   Compilation rules     #######################
 ##################################################################
 
 
-include ${PETSC_DIR}/conf/variables
-include ${PETSC_DIR}/conf/rules
-include ${SLEPC_DIR}/conf/slepc_common
+include ${PETSC_DIR}/lib/petsc/conf/variables
+include ${PETSC_DIR}/lib/petsc/conf/rules
+include ${SLEPC_DIR}/lib/slepc/conf/slepc_common
 
 # blib :
 # 	-@echo "BEGINNING TO COMPILE LIBRARIES "
@@ -105,12 +108,16 @@ distclean :
 rmat :
 	-rm -drf matrices_tmp/*
 
+
 exec: main.o
 	-@echo "BEGINNING TO COMPILE APPLICATION "
 	-@echo "========================================="
-	-@echo ${CLINKER}	
-	-@echo " -----------------------------------------------------------"
-	@${CLINKER} -g -v -o ${EXEC} main.o ${OFILES} ${HFILES} -I${PETSC_DIR}/include -L${SLEPC_LIB} -L${PETSC_DIR}/${PETSC_ARCH}/lib  -L.
+	@${CLINKER} -g -v -o ${EXEC} main.o ${OFILES} ${HFILES}  -L${SLEPC_LIB}  -L.
+	#${CLINKER} ${SLEPC_LIB} -L${PETSC_DIR}/${PETSC_ARCH}/lib/petsc/conf/ -L. ${OFILES}  -o ${EXEC} main.o ${HFILES} -I${PETSC_DIR}/include/petsc/private/ -I${PETSC_DIR}/${PETSC_ARCH}/include -I${PETSC_DIR}/include 
+	-@echo "Completed building application"
+	-@echo "========================================="
+
+
 
 effacer :
 	-rm *.bin

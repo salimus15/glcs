@@ -15,5 +15,5 @@ all: ${CLEANFILE}
 #cleanall: ${CLEANFILE}
 #	${RM} ${GLSA_OBJ_DIR}/$<
 
-include ${SLEPC_DIR}/conf/slepc_common
+include ${SLEPC_DIR}/lib/slepc/conf/slepc_common
 

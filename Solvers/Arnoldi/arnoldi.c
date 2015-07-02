@@ -15,19 +15,9 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 	Vec initialv,nullv,*vs;
 	PetscBool flag,data_load,data_export,continuous_export,load_any;
 	int exit_type=0;
-	FILE * ftest = NULL;
-	int descriptor;
 
-
-	    PetscPrintf(PETSC_COMM_WORLD,"$}### ARNOLDI mr rank : %d my group : %d my color : %d  I send to %d  and receive fom %d\n",com->rank_world, com->com_group,com->color_group,com->in_com,com->out_com);
 	sprintf(load_path,"./arnoldi.bin");
 	sprintf(export_path,"./arnoldi.bin");
-	
-	if((ftest = fopen((char *)load_path, "r")) == NULL)
-	{
-		ierr=PetscBinaryOpen(load_path,FILE_MODE_WRITE,&descriptor);CHKERRQ(ierr);
-		ierr=PetscBinaryClose(descriptor);CHKERRQ(ierr);
-	}else fclose(ftest);
 
 	/* create the eigensolver */
 	ierr=EPSCreate(PETSC_COMM_WORLD,&eps);CHKERRQ(ierr);
@@ -99,24 +89,24 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 
 		}
 		#ifdef DEBUG
-	  	printf("*} Arnoldi  initial vector initiated\n");
+//	  	printf("*} Arnoldi  initial vector initiated\n");
 		#endif
 
 		#ifdef DEBUG
-		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Launching EPSSolve\n");
+//		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Launching EPSSolve\n");
 		#endif
 		/* compute eigenvalues */
 		ierr=EPSSolve(eps);CHKERRQ(ierr);
 
 		#ifdef DEBUG
-		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Achieved EPSSolve\n");
+//		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Achieved EPSSolve\n");
 		#endif
 
 		/* get the number of guessed eigenvalues */
 		ierr=EPSGetConverged(eps,&eigen_nb);CHKERRQ(ierr);
 
 // 		#ifdef DEBUG
-		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi %d converged eigenvalues\n",eigen_nb);
+//		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi %d converged eigenvalues\n",eigen_nb);
 // 		#endif
 
 		/* send them */
@@ -134,15 +124,16 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 
 			eigenvalues[j]=(PetscScalar)re+PETSC_i*(PetscScalar)im;
 
-			#ifdef DEBUG
+/*			#ifdef DEBUG
 			if(im!=0.0)
 			  PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi %d/%d val : %e %e\n",j,eigen_nb,re,im);
 			else
 			  PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi  %d/%d val : %e\n",j,eigen_nb,er);
 			#endif
+*/
 		}
 		#ifdef DEBUG
-		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi  Sending to LS\n");
+//		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi  Sending to LS\n");
 		#endif
 		/* send the data array */
 		mpi_lsa_com_array_send(com, &eigen_nb, eigenvalues);

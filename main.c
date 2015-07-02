@@ -31,7 +31,7 @@ int main(int argc, char ** argv){
 	ierr=SlepcInitialize(&argc,&argv,(char *)0,help);	CHKERRQ(ierr);
 	PetscPrintf(com.com_world,"]> Initializing PETSc/SLEPc\n");
 
-
+/*	VecCreate()*/
 
 	/* programm options */
 	ierr=PetscOptionsBegin(PETSC_COMM_WORLD, "", "Options for the GMRES/LS-Arnoldi solver", "KSP");CHKERRQ(ierr);

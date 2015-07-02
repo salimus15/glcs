@@ -15,7 +15,7 @@ PetscErrorCode MyKSPFGMRESCycle(PetscInt *itcount,KSP ksp)
   PetscInt       max_k = fgmres->max_k; /* max # of directions Krylov space */
   Mat            Amat,Pmat;
 
-  PetscFunctionBegin;
+	PetscFunctionBegin;
   /* Number of pseudo iterations since last restart is the number
      of prestart directions */
   loc_it = 0;

@@ -8,7 +8,7 @@
 #include "../../Libs/mpi_lsa_com.h"
 #include "fgmresimpl.h"
 
-
+//static PetscErrorCode MyKSPFGMRESResidual(KSP ksp);
 PetscErrorCode MyKSPSolve_FGMRES(KSP ksp,com_lsa * com);
 
 #endif

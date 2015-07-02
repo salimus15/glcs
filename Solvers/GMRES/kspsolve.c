@@ -8,10 +8,9 @@ PetscErrorCode MyKSPSolve(KSP ksp,Vec b,Vec x,com_lsa * com)
   PetscBool         flag1,flag2,flag3,flg = PETSC_FALSE,inXisinB=PETSC_FALSE,guess_zero;
   Mat               mat,premat;
   MPI_Comm          comm;
-	
-  PetscFunctionBegin;
-//  PetscPrintf(com.com_world,"]> jusque la c bon va\n");
 
+  PetscFunctionBegin;
+//	printf("\n\n##########  lunching kspsolve  ###########"" \n\n");
   PetscValidHeaderSpecific(ksp,KSP_CLASSID,1);
   if (b) PetscValidHeaderSpecific(b,VEC_CLASSID,2);
   if (x) PetscValidHeaderSpecific(x,VEC_CLASSID,3);
@@ -49,12 +48,14 @@ PetscErrorCode MyKSPSolve(KSP ksp,Vec b,Vec x,com_lsa * com)
   /* KSPSetUp() scales the matrix if needed */
   ierr = KSPSetUp(ksp);CHKERRQ(ierr);
   ierr = KSPSetUpOnBlocks(ksp);CHKERRQ(ierr);
-//  VecLocked(ksp->vec_sol,3);
+  VecLocked(ksp->vec_sol,3);
 
   /* diagonal scale RHS if called for */
   if (ksp->dscale) {
+
     ierr = VecPointwiseMult(ksp->vec_rhs,ksp->vec_rhs,ksp->diagonal);CHKERRQ(ierr);
     /* second time in, but matrix was scaled back to original */
+
     if (ksp->dscalefix && ksp->dscalefix2) {
       Mat mat,pmat;
 
@@ -73,6 +74,7 @@ PetscErrorCode MyKSPSolve(KSP ksp,Vec b,Vec x,com_lsa * com)
       ierr = VecPointwiseMult(ksp->vec_sol,ksp->vec_sol,ksp->truediagonal);CHKERRQ(ierr);
     }
   }
+
   ierr = PCPreSolve(ksp->pc,ksp);CHKERRQ(ierr);
 
   if (ksp->guess_zero) { ierr = VecSet(ksp->vec_sol,0.0);CHKERRQ(ierr);}
@@ -90,13 +92,25 @@ PetscErrorCode MyKSPSolve(KSP ksp,Vec b,Vec x,com_lsa * com)
     ierr = VecNormAvailable(ksp->vec_sol,NORM_2,&flg,&norm);CHKERRQ(ierr);
     if (flg && !norm) ksp->guess_zero = PETSC_TRUE;
   }
-//  ierr = VecLockPush(ksp->vec_rhs);CHKERRQ(ierr);
-  ierr            = (*ksp->ops->solve)(ksp);CHKERRQ(ierr);
-//  ierr = VecLockPop(ksp->vec_rhs);CHKERRQ(ierr);
+
+  ierr = VecLockPush(ksp->vec_rhs);CHKERRQ(ierr);
+/* !!!!!!!!!!!!!!!!!!!!!!    IMPORTANT   !!!!!!!!!!!!!!!!!!!!
+	!!!!!!!!!!!!!!!!!!!! THIS IS A MAJOR CHANGE OF THE ORIGINAL SOURCE CODE AND IT MAY ENGENDER SOME PROBLEMS  <<<< So keep an eye on it >>>> !!!!!!!!!
+		
+this is the default way to lunch the actual solver 
+//  ierr            = (*ksp->ops->solve)(ksp);CHKERRQ(ierr); 
+ the problem is that we set KSPSetType to fgmres what makes PETSC use its own solver
+So in order to use our FGMRES we make it explicitly like follows
+
+	!!!!!!! this is what we call in french "méthode bourrin " !!!!!!
+*/
+	ierr = MyKSPSolve_FGMRES(ksp,com);CHKERRQ(ierr);
+
+  ierr = VecLockPop(ksp->vec_rhs);CHKERRQ(ierr);
   ksp->guess_zero = guess_zero;
 
   if (!ksp->reason) SETERRQ(comm,PETSC_ERR_PLIB,"Internal error, solver returned without setting converged reason");
-//  ierr = KSPReasonViewFromOptions(ksp);CHKERRQ(ierr);
+  ierr = KSPReasonViewFromOptions(ksp);CHKERRQ(ierr);
   ierr = PCPostSolve(ksp->pc,ksp);CHKERRQ(ierr);
 
   /* diagonal scale solution if called for */
@@ -119,8 +133,7 @@ PetscErrorCode MyKSPSolve(KSP ksp,Vec b,Vec x,com_lsa * com)
   if (ksp->postsolve) {
     ierr = (*ksp->postsolve)(ksp,ksp->vec_rhs,ksp->vec_sol,ksp->postctx);CHKERRQ(ierr);
   }
-  /* ******************************************************************************************************* */
-printf(" alama dagui ILHA .... :) :)\n ");
+
   if (ksp->guess) {
     ierr = KSPFischerGuessUpdate(ksp->guess,ksp->vec_sol);CHKERRQ(ierr);
   }
