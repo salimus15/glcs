@@ -20,7 +20,7 @@ MDIR=./data
 ##################      Tuning  FLAGS      #######################
 ##################################################################
 
-RESTART_MAX=  100
+RESTART_MAX=  200
 RESTART_MIN=  3
 RESTART_INCREMENT = 3
 RESTART_STRATEGY = none
@@ -43,22 +43,22 @@ GMRES_PRECISION = 1e-20
 GMRES_RESTART = ${RESTART_MAX}
 GMRES_NB_NODES = 1
 GMRES_MONITOR = -ksp_monitor_true_residual
-GMRES_FLAGS = -ksp_rtol 1e-100 -ksp_divtol 1e1000 -ksp_max_it 5000 -pc_type none -ksp_atol ${GMRES_PRECISION} -ksp_gmres_restart ${GMRES_RESTART}\
+GMRES_FLAGS = -ksp_rtol 1e-100 -ksp_divtol 1e1000 -ksp_max_it 10000 -pc_type none -ksp_atol ${GMRES_PRECISION} -ksp_gmres_restart ${GMRES_RESTART}\
 		${GMRES_MONITOR} ${GMRES_VIEW} -lsa_gmres ${GMRES_NB_NODES} ${RESTART} ${ORTHOG}
 #arnoldi options
 ARNOLDI_PRECISION = 1e-5
-ARNOLDI_NBEIGEN = 100
+ARNOLDI_NBEIGEN = 20
 ARNOLDI_NB_NODES = 1
 #ARNOLDI_MONITOR = -eps_monitor
 # ARNOLDI_LOAD_ANY = -ksp_arnoldi_load_any
 ARNOLDI_FLAGS = -eps_type arnoldi -eps_true_residual -eps_largest_imaginary -eps_nev ${ARNOLDI_NBEIGEN} -eps_tol ${ARNOLDI_PRECISION} \
 		${ARNOLDI_MONITOR} -lsa_arnoldi ${ARNOLDI_NB_NODES} -eps_max_it 5 -ksp_arnoldi_cexport ${ARNOLDI_LOAD_ANY}
 #ls options
-LS_POWER = 15
-LS_POLY_APPL = 11
-LS_LATENCY = 200
+LS_POWER = 5
+LS_POLY_APPL = 10
+LS_LATENCY = 3
 LS_PC_USE = 1
-LS_HANG_IT = 5000
+LS_HANG_IT = 10000
 LS_HANG_TIME =  1
 # LS_LOAD_ANY = -ksp_ls_load_any
 LS_FLAGS = -ksp_ls_power ${LS_POWER} -ksp_ls_m_hang ${LS_HANG_IT} -ksp_ls_timing ${LS_HANG_TIME}  -ksp_ls_k_param ${LS_POLY_APPL} -ksp_ls_nopc ${LS_PC_USE} -ksp_ls_latency ${LS_LATENCY} -ksp_ls_cexport ${LS_LOAD_ANY}
@@ -71,6 +71,7 @@ MPI_NODES = ${shell echo ${GMRES_NB_NODES}+${ARNOLDI_NB_NODES}+2 | bc}
 ##################################################################
 ##################   Compilation rules     #######################
 ##################################################################
+
 
 
 include ${PETSC_DIR}/lib/petsc/conf/variables
@@ -133,28 +134,68 @@ effacer :
 ##################     Execution Rules     #######################
 ##################################################################
 #valgrind --sigill-diagnostics=yes --show-below-main=yes --leak-check=full --show-leak-kinds=all
+
+# No convergence observed
+runlhr:
+	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
+	-mfile ${MDIR}/lhr01.mtx_1477x1477_18592nnz \
+	2>&1 | tee loglhr01.txt ; rm *.bin
+
+# Arnoldi crashes
+runck:
+	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
+	-mfile ${MDIR}/ck656.mtx_656x656_3884nnz \
+	2>&1 | tee logck656.txt ; rm *.bin
+
+# Arnoldi crashes
 runl:
 	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
-	-mfile ${MDIR}/young4c.mtx_841x841_4089nnz \
-	2>&1 | tee log.txt
-	
+	-mfile ${MDIR}/tub1000.mtx_1000x1000_3996nnz \
+	2>&1 | tee logtub1000.txt ; rm *.bin
+
+#gmres does not converge better when using LS sended data 	
 runs:
 	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
 	-mfile ${MDIR}/mhd1280a.mtx_1280x1280_47906nnz \
-	2>&1 | tee log.txt
+	2>&1 | tee logmhd1280a.txt ; rm *.bin
 
+# No convergence observed
 runx:
 	 ${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND}  ./hyperh ${GLSA_FLAGS} \
-	-mfile ${MDIR}/waveguide3D.mtx_21036x21036_303468nnz  \
-	-vfile ${MDIR}/waveguide3D_b.mtx_21036 \
-	2>&1 | tee log.txt
+	-mfile ${MDIR}/utm300.mtx_300x300_3155nnz  \
+	2>&1 | tee logutm300.txt ; rm *.bin
 
-
+# no convergence for gmres alone and divergence using LS
 runa:
 	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh ${GLSA_FLAGS} \
-	-mfile ${MDIR}/utm1700b/data/utm1700b.mtx_1700x1700_21509nnz.gz  \
-	-vfile ${MDIR}/utm1700b/data/utm1700b_b.mtx_1700.gz \
-	2>&1 | tee log.txt
+	-mfile ${MDIR}/utm1700b.mtx_1700x1700_21509nnz  \
+	2>&1 | tee log1700b.txt ; rm *.bin
+# gmres alone has a very good convergence
+runy:
+	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
+	-mfile ${MDIR}/young4c.mtx_841x841_4089nnz \
+	2>&1 | tee log.txt ; rm *.bin
+
+## too much huge for my pc
+#runw:
+#	 ${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND}  ./hyperh ${GLSA_FLAGS} \
+#	-mfile ${MDIR}/waveguide3D.mtx_21036x21036_303468nnz  \
+#	-vfile ${MDIR}/waveguide3D_b.mtx_21036 \
+#	2>&1 | tee logwave.txt
+
+#runs:
+#	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
+#	-mfile ${MDIR}/mhd1280a.mtx_1280x1280_47906nnz \
+#	2>&1 | tee log.txt
+
+
+
+
+#runa:
+#	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh ${GLSA_FLAGS} \
+#	-mfile ${MDIR}/utm1700b/data/utm1700b.mtx_1700x1700_21509nnz.gz  \
+#	-vfile ${MDIR}/utm1700b/data/utm1700b_b.mtx_1700.gz \
+#	2>&1 | tee log.txt
 
 
 runb:

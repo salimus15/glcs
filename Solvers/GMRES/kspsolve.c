@@ -1,6 +1,7 @@
 /*CREATED BY PIERRE-YVES AQUILANTI 2011*/
 #include "kspsolve.h"
-
+#undef __FUNCT__
+#define __FUNCT__ "MyKSPSolve"
 PetscErrorCode MyKSPSolve(KSP ksp,Vec b,Vec x,com_lsa * com)
 {
   PetscErrorCode    ierr;
@@ -102,7 +103,7 @@ this is the default way to lunch the actual solver
  the problem is that we set KSPSetType to fgmres what makes PETSC use its own solver
 So in order to use our FGMRES we make it explicitly like follows
 
-	!!!!!!! this is what we call in french "méthode bourrin " !!!!!!
+	!!!!!!! that's what we call in french "méthode bourrin " !!!!!!
 */
 	ierr = MyKSPSolve_FGMRES(ksp,com);CHKERRQ(ierr);
 
