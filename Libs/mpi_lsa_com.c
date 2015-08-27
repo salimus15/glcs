@@ -182,9 +182,9 @@ int mpi_lsa_com_vec_send(com_lsa * com, Vec * v){
 *
 ************************************************************************************/
 
-
+// for the validaig funcion check on the bottom
 int mpi_lsa_com_vec_recv(com_lsa * com, Vec * v){
-	int flag,count;
+	int flag,count,i;
 	PetscInt size,tmp_int;
 	PetscErrorCode ierr;
 	MPI_Status status,statas;
@@ -212,41 +212,12 @@ int mpi_lsa_com_vec_recv(com_lsa * com, Vec * v){
 	 * the array pointer is only pointing to the local vector memory of the node */
 	MPI_Recv(&com->in_received_buffer[com->vec_in_disp[status.MPI_SOURCE]],count,MPIU_SCALAR,status.MPI_SOURCE,status.MPI_TAG,com->in_com,&statas);
 	com->in_received++;
-
-	return 0;
-}
-
-
-/* validate if a vector was entirely received */
-int mpi_lsa_com_vec_recv_validate(com_lsa * com, Vec * v){
-	int vector_chunks;
-	int my_com_size;
-	PetscScalar tmp_local,tmp_global,*array;
-	PetscInt local_size,i;
-	PetscErrorCode ierr;
-
-	/* first we get the number of vector portions that the group should receive */
-	MPI_Comm_size(com->com_group,&my_com_size);
-	ierr=VecGetLocalSize(*v,&local_size);CHKERRQ(ierr);
-
-	if(my_com_size==1) { /* node is alone in it's group */
-		vector_chunks=com->in_number;
-	} else { /* many nodes in the group */
-		vector_chunks=my_com_size;
-	}
-
-	tmp_local=(PetscScalar)com->in_received;
-	tmp_global=(PetscScalar)0;
-	/* now computes how many data chunks we got */
-	MPI_Allreduce(&tmp_local,&tmp_global,1,MPIU_SCALAR,MPI_SUM,com->com_group);
-
-	if(((int)(PetscRealPart(tmp_global)))==vector_chunks){ /* we got the chunks on all processors or from all processors */
-		ierr=VecGetArray(*v,&array);CHKERRQ(ierr);
-		for(i=0;i<local_size;i++)
-			array[i]=com->in_received_buffer[i];
-		ierr=VecRestoreArray(*v,&array);CHKERRQ(ierr);
-		com->in_received=0;
-		return 0;
+	
+	if(!(mpi_lsa_com_vec_recv_validate(com, v, size))){
+		for( i = 0; i < size; ++i){
+			ierr=VecSetValue(*v, (PetscInt)i,com->in_received_buffer[i], INSERT_VALUES);CHKERRQ(ierr);
+		}
+		return 0;	
 	}
 
 	return 1;
@@ -316,6 +287,7 @@ int mpi_lsa_com_array_recv(com_lsa * com, int * size, PetscScalar * data){
 
 	/* how large will be the array */
 	MPI_Get_count(&status,MPIU_SCALAR,size);
+//	if(size == 1){ size =0;	return 1;
 	printf("Receive size=%d (%d scalars)\n",*size,*size/8);
 	/* receive the data array */
 //	PetscMalloc(sizeof(PetscScalar)*(PetscInt)size,&data);
@@ -401,14 +373,15 @@ int mpi_lsa_com_type_send(com_lsa * com, int * type){
 	MPI_Status status;
 	int flag,i;
 
-
+    //FIXME : Ceci part d'une bonne idée mais fait plus de mal que de bien Donc à revoir
+     
 	/* check if previous requests where completed */
-	for(i=0;i<com->out_sended;i++){
-		MPI_Test(&(com->type_requests[i]),&flag,&status);
-		/* if not cancel it */
-		if(!flag)
-			MPI_Cancel(&(com->type_requests[i]));
-	}
+/*	for(i=0;i<com->out_sended;i++){*/
+/*		MPI_Test(&(com->type_requests[i]),&flag,&status);*/
+/*		/* if not cancel it */
+/*		if(!flag)*/
+/*			MPI_Cancel(&(com->type_requests[i]));*/
+/*	}*/
 
 	/* for each node in the out domain */
 	for(i=0;i<com->out_number;i++){
@@ -420,6 +393,81 @@ int mpi_lsa_com_type_send(com_lsa * com, int * type){
 }
 
 
+int mpi_lsa_com_vec_recv_validate(com_lsa * com, Vec * v, int size){
+	int vector_chunks;
+	int my_com_size;
+	PetscScalar  *array;
+	int global_size,local_size,i;
+	PetscErrorCode ierr;
 
+	/* first we get the number of vector portions that the group should receive */
+	MPI_Comm_size(com->com_group,&my_com_size);
+	
+	if(my_com_size == 1){ //this means that the process is alone in his group  
+	   ierr=VecGetSize(*v,&local_size);CHKERRQ(ierr);
+	   if(size == local_size){
+	   	ierr=VecGetArray(*v,&array);CHKERRQ(ierr);
+		for(i=0;i<local_size;i++)
+			array[i]=com->in_received_buffer[i];
+		ierr=VecRestoreArray(*v,&array);CHKERRQ(ierr);
+		com->in_received=0;
+		return 0;
+	   } else return 1;
+	}
+	
+	if(my_com_size > 1){
+	   global_size=0;
+	   ierr=VecGetLocalSize(v,&local_size);CHKERRQ(ierr);
+	   MPI_Allreduce( &local_size, &global_size, 1, MPI_INT, MPI_SUM, com->com_group);
+	   if(global_size == size){
+	   	
+	   	   ierr=VecGetSize(v,&local_size);CHKERRQ(ierr);
+		   if(size == local_size){
+		        ierr=VecGetArray(*v,&array);CHKERRQ(ierr);
+			   for(i=0;i<local_size;i++)
+					array[i]=com->in_received_buffer[i];
+			   ierr=VecRestoreArray(*v,&array);CHKERRQ(ierr);
+			   com->in_received=0;
+		   return 0;
+		   }
+		}else return 1; 	
+	}
+	
+	
+	return 1; //this happends when my_com_size has strenge value "less than 0" 
+}
 
+/*/* validate if a vector was entirely received */
+/*int mpi_lsa_com_vec_recv_validate(com_lsa * com, Vec * v){*/
+/*	int vector_chunks;*/
+/*	int my_com_size;*/
+/*	PetscScalar tmp_local,tmp_global,*array;*/
+/*	PetscInt local_size,i;*/
+/*	PetscErrorCode ierr;*/
 
+/*	/* first we get the number of vector portions that the group should receive */
+/*	MPI_Comm_size(com->com_group,&my_com_size);*/
+/*	ierr=VecGetLocalSize(*v,&local_size);CHKERRQ(ierr);*/
+
+/*	if(my_com_size==1) { /* node is alone in it's group */
+/*		vector_chunks=com->in_number;*/
+/*	} else { /* many nodes in the group */
+/*		vector_chunks=my_com_size;*/
+/*	}*/
+
+/*	tmp_local=(PetscScalar)com->in_received;*/
+/*	tmp_global=(PetscScalar)0;*/
+/*	/* now computes how many data chunks we got */
+/*	MPI_Allreduce(&tmp_local,&tmp_global,1,MPIU_SCALAR,MPI_SUM,com->com_group);*/
+
+/*	if(((int)(PetscRealPart(tmp_global)))==vector_chunks){ /* we got the chunks on all processors or from all processors */
+/*		ierr=VecGetArray(*v,&array);CHKERRQ(ierr);*/
+/*		for(i=0;i<local_size;i++)*/
+/*			array[i]=com->in_received_buffer[i];*/
+/*		ierr=VecRestoreArray(*v,&array);CHKERRQ(ierr);*/
+/*		com->in_received=0;*/
+/*		return 0;*/
+/*	}*/
+
+/*	return 1;*/
+/*}*/

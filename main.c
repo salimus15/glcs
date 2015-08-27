@@ -18,7 +18,7 @@ int main(int argc, char ** argv){
 	char cCurrentPath[FILENAME_MAX];
 	char path[FILENAME_MAX];
 	
-	
+	time_t firstTime, secondTime;	
 	mode_t process_mask = umask(0);
 	/* init of MPI and MPI Utils */
 	MPI_Init(&argc,&argv);
@@ -112,6 +112,7 @@ int main(int argc, char ** argv){
 	ierr=PetscOptionsGetInt(PETSC_NULL,"-ksp_ls_nopc",&nols,&flag);CHKERRQ(ierr);
 	if(!flag) nols=1;
 	else if(nols==0) PetscPrintf(com.com_world,"]> not using LSA preconditionning %d\n",nols);
+ 	time(&firstTime);
 
 	/*create viewers for each group if asked for*/
 	PetscOptionsHasName(PETSC_NULL,"-output_file",&flag);
@@ -149,9 +150,11 @@ int main(int argc, char ** argv){
 		LSQR(&com,&vsize);
 	}
 
+	time(&secondTime);
 
 	PetscPrintf(PETSC_COMM_WORLD,"End of Computation\n");
 
+	PetscPrintf(PETSC_COMM_WORLD," TOTAL ELLAPSED TIME = %f seconds", difftime(secondTime,firstTime));
 
 
 	/* end of the programm, deallocate structures and arrays */

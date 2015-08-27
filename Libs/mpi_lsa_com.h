@@ -31,7 +31,7 @@ int mpi_lsa_com_vec_send(com_lsa * com, Vec * v);
 /* receive a vector */
 int mpi_lsa_com_vec_recv(com_lsa * com, Vec * v);
 /* validate if a vector has entirely been received */
-int mpi_lsa_com_vec_recv_validate(com_lsa * com, Vec * v);
+int mpi_lsa_com_vec_recv_validate(com_lsa * com, Vec * v, int size);
 
 
 

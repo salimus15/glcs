@@ -135,6 +135,8 @@ PetscErrorCode MyKSPFGMRESCycle(PetscInt *itcount,KSP ksp)
         }
       }
     }
+    
+    
   }
   /* END OF ITERATION LOOP */
   ierr = KSPLogResidualHistory(ksp,res_norm);CHKERRQ(ierr);

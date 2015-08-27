@@ -20,7 +20,7 @@ MDIR=./data
 ##################      Tuning  FLAGS      #######################
 ##################################################################
 
-RESTART_MAX=  200
+RESTART_MAX= 200
 RESTART_MIN=  3
 RESTART_INCREMENT = 3
 RESTART_STRATEGY = none
@@ -43,22 +43,23 @@ GMRES_PRECISION = 1e-20
 GMRES_RESTART = ${RESTART_MAX}
 GMRES_NB_NODES = 1
 GMRES_MONITOR = -ksp_monitor_true_residual
-GMRES_FLAGS = -ksp_rtol 1e-100 -ksp_divtol 1e1000 -ksp_max_it 10000 -pc_type none -ksp_atol ${GMRES_PRECISION} -ksp_gmres_restart ${GMRES_RESTART}\
+GMRES_FLAGS = -ksp_rtol 1e-100 -ksp_divtol 1e1000 -ksp_max_it 7000 -pc_type none -ksp_atol ${GMRES_PRECISION} -ksp_gmres_restart ${GMRES_RESTART}\
 		${GMRES_MONITOR} ${GMRES_VIEW} -lsa_gmres ${GMRES_NB_NODES} ${RESTART} ${ORTHOG}
 #arnoldi options
 ARNOLDI_PRECISION = 1e-5
-ARNOLDI_NBEIGEN = 20
+ARNOLDI_NBEIGEN = 50
 ARNOLDI_NB_NODES = 1
+#ARNOLDI_LOAD_INITIAL = -ksp_arnoldi_load
 #ARNOLDI_MONITOR = -eps_monitor
 # ARNOLDI_LOAD_ANY = -ksp_arnoldi_load_any
 ARNOLDI_FLAGS = -eps_type arnoldi -eps_true_residual -eps_largest_imaginary -eps_nev ${ARNOLDI_NBEIGEN} -eps_tol ${ARNOLDI_PRECISION} \
 		${ARNOLDI_MONITOR} -lsa_arnoldi ${ARNOLDI_NB_NODES} -eps_max_it 5 -ksp_arnoldi_cexport ${ARNOLDI_LOAD_ANY}
 #ls options
-LS_POWER = 5
+LS_POWER = 10
 LS_POLY_APPL = 10
-LS_LATENCY = 3
+LS_LATENCY = 2
 LS_PC_USE = 1
-LS_HANG_IT = 10000
+LS_HANG_IT = 7000
 LS_HANG_TIME =  1
 # LS_LOAD_ANY = -ksp_ls_load_any
 LS_FLAGS = -ksp_ls_power ${LS_POWER} -ksp_ls_m_hang ${LS_HANG_IT} -ksp_ls_timing ${LS_HANG_TIME}  -ksp_ls_k_param ${LS_POLY_APPL} -ksp_ls_nopc ${LS_PC_USE} -ksp_ls_latency ${LS_LATENCY} -ksp_ls_cexport ${LS_LOAD_ANY}
@@ -113,8 +114,9 @@ rmat :
 exec: main.o
 	-@echo "BEGINNING TO COMPILE APPLICATION "
 	-@echo "========================================="
-	@${CLINKER} -g -v -o ${EXEC} main.o ${OFILES} ${HFILES}  -L${SLEPC_LIB}  -L.
-	#${CLINKER} ${SLEPC_LIB} -L${PETSC_DIR}/${PETSC_ARCH}/lib/petsc/conf/ -L. ${OFILES}  -o ${EXEC} main.o ${HFILES} -I${PETSC_DIR}/include/petsc/private/ -I${PETSC_DIR}/${PETSC_ARCH}/include -I${PETSC_DIR}/include 
+	@${CLINKER} -I${SLEPC_DIR}/include ${OFILES} ${HFILES} -L${SLEPC_LIB} -L. -L${SLEPC_DIR}/${PETSC_ARCH}/lib -g -v -o ${EXEC} main.o   
+	#@${CLINKER} -L{PETSC_DIR}/${PETSC_ARCH}/lib -g -v -o ${EXEC} main.o ${OFILES} ${HFILES} -I${PETSC_DIR}/include -lm 
+	#${CLINKER}  -L${PETSC_DIR}/${PETSC_ARCH}/lib/petsc/conf/ -L. ${OFILES}  -o ${EXEC} main.o ${HFILES} -I${PETSC_DIR}/include/petsc/private/ -I${PETSC_DIR}/${PETSC_ARCH}/include -I${PETSC_DIR}/include 
 	-@echo "Completed building application"
 	-@echo "========================================="
 
@@ -135,155 +137,131 @@ effacer :
 ##################################################################
 #valgrind --sigill-diagnostics=yes --show-below-main=yes --leak-check=full --show-leak-kinds=all
 
-# No convergence observed
+#
 runlhr:
 	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
 	-mfile ${MDIR}/lhr01.mtx_1477x1477_18592nnz \
-	2>&1 | tee loglhr01.txt ; rm *.bin
+	2>&1 | tee ./resultats/loglhr01_m${RESTART_MAX}_ls${LS_PC_USE}_ma${ARNOLDI_NBEIGEN}_lsp${LS_POWER}_lsa${LS_POLY_APPL}_f${LS_LATENCY}.txt ; rm *.bin
 
 # Arnoldi crashes
 runck:
 	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
 	-mfile ${MDIR}/ck656.mtx_656x656_3884nnz \
-	2>&1 | tee logck656.txt ; rm *.bin
+	2>&1 | tee ./resultats/logck656_m${RESTART_MAX}_ls${LS_PC_USE}_ma${ARNOLDI_NBEIGEN}_lsp${LS_POWER}_lsa${LS_POLY_APPL}_f${LS_LATENCY}.txt ; rm *.bin
 
-# Arnoldi crashes
+# no convergence for gmres neither for arnoldi 
 runl:
 	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
 	-mfile ${MDIR}/tub1000.mtx_1000x1000_3996nnz \
-	2>&1 | tee logtub1000.txt ; rm *.bin
+	2>&1 | tee ./resultats/logtub1000_m${RESTART_MAX}_ls${LS_PC_USE}_ma${ARNOLDI_NBEIGEN}_lsp${LS_POWER}_lsa${LS_POLY_APPL}_f${LS_LATENCY}.txt ; rm *.bin
 
 #gmres does not converge better when using LS sended data 	
 runs:
 	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
 	-mfile ${MDIR}/mhd1280a.mtx_1280x1280_47906nnz \
-	2>&1 | tee logmhd1280a.txt ; rm *.bin
+	2>&1 | tee ./resultats/logmhd1280a_m${RESTART_MAX}_ls${LS_PC_USE}_ma${ARNOLDI_NBEIGEN}_lsp${LS_POWER}_lsa${LS_POLY_APPL}_f${LS_LATENCY}.txt ; rm *.bin
 
 # No convergence observed
 runx:
-	 ${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND}  ./hyperh ${GLSA_FLAGS} \
-	-mfile ${MDIR}/utm300.mtx_300x300_3155nnz  \
-	2>&1 | tee logutm300.txt ; rm *.bin
+	 ${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND}  ./hyperh ${GLSA_FLAGS} -mfile ${MDIR}/utm300.mtx_300x300_3155nnz
 
 # no convergence for gmres alone and divergence using LS
 runa:
 	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh ${GLSA_FLAGS} \
-	-mfile ${MDIR}/utm1700b.mtx_1700x1700_21509nnz  \
-	2>&1 | tee log1700b.txt ; rm *.bin
+	-mfile ${MDIR}/utm1700a.mtx_1700x1700_21313nnz  \
+	2>&1 | tee ./resultats/log1700b_m${RESTART_MAX}_ls${LS_PC_USE}_ma${ARNOLDI_NBEIGEN}_lsp${LS_POWER}_lsa${LS_POLY_APPL}_f${LS_LATENCY}.txt ; rm *.bin
 # gmres alone has a very good convergence
 runy:
 	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
 	-mfile ${MDIR}/young4c.mtx_841x841_4089nnz \
-	2>&1 | tee log.txt ; rm *.bin
+	2>&1 | tee ./resultats/logyoung4c_m${RESTART_MAX}_ls${LS_PC_USE}_ma${ARNOLDI_NBEIGEN}_lsp${LS_POWER}_lsa${LS_POLY_APPL}_f${LS_LATENCY}.txt ; rm *.bin
 
-## too much huge for my pc
-#runw:
-#	 ${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND}  ./hyperh ${GLSA_FLAGS} \
-#	-mfile ${MDIR}/waveguide3D.mtx_21036x21036_303468nnz  \
-#	-vfile ${MDIR}/waveguide3D_b.mtx_21036 \
-#	2>&1 | tee logwave.txt
-
-#runs:
+#runb:
 #	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
-#	-mfile ${MDIR}/mhd1280a.mtx_1280x1280_47906nnz \
+#	-mfile ${MDIR}/pde225/data/pde225.mtx_225x225_1065nnz.gz \
 #	2>&1 | tee log.txt
 
+#runc:
+#	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
+#	-mfile ${MDIR}/utm300/data/utm300.mtx_300x300_3155nnz.gz \
+#	-vfile ${MDIR}/utm300/data/utm300_b.mtx_300.gz \
+#	2>&1 | tee log.txt
 
+#rund:
+#	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
+#	-mfile ${MDIR}/data/fs_183_1.mtx_183x183_1069nnz.gz  \
+#	2>&1 | tee log.txt
 
+#rune:
+#	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
+#	-mfile ${MDIR}/pde2961/data/pde2961.mtx_2961x2961_14585nnz.gz \
+#	2>&1 | tee log.txt
 
-#runa:
+#runf:
 #	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh ${GLSA_FLAGS} \
-#	-mfile ${MDIR}/utm1700b/data/utm1700b.mtx_1700x1700_21509nnz.gz  \
-#	-vfile ${MDIR}/utm1700b/data/utm1700b_b.mtx_1700.gz \
+#	-mfile ${MDIR}/epb0/data/epb0.mtx_1794x1794_7764nnz.gz \
+#	2>&1 | tee log.txt
+
+#rung:
+#	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh ${GLSA_FLAGS} \
+#	-mfile ${MDIR}/fs_541_1/data/fs_541_1.mtx_541x541_4285nnz.gz \
 #	2>&1 | tee log.txt
 
 
-runb:
-	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
-	-mfile ${MDIR}/pde225/data/pde225.mtx_225x225_1065nnz.gz \
-	2>&1 | tee log.txt
-
-runc:
-	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
-	-mfile ${MDIR}/utm300/data/utm300.mtx_300x300_3155nnz.gz \
-	-vfile ${MDIR}/utm300/data/utm300_b.mtx_300.gz \
-	2>&1 | tee log.txt
-
-rund:
-	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
-	-mfile ${MDIR}/data/fs_183_1.mtx_183x183_1069nnz.gz  \
-	2>&1 | tee log.txt
-
-rune:
-	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
-	-mfile ${MDIR}/pde2961/data/pde2961.mtx_2961x2961_14585nnz.gz \
-	2>&1 | tee log.txt
-
-runf:
-	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh ${GLSA_FLAGS} \
-	-mfile ${MDIR}/epb0/data/epb0.mtx_1794x1794_7764nnz.gz \
-	2>&1 | tee log.txt
-
-rung:
-	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh ${GLSA_FLAGS} \
-	-mfile ${MDIR}/fs_541_1/data/fs_541_1.mtx_541x541_4285nnz.gz \
-	2>&1 | tee log.txt
+#runh:
+#	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
+#	-mfile ${MDIR}/shermanACa/data/shermanACa.mtx_3432x3432_25220nnz.gz \
+#	2>&1 | tee log.txt
 
 
-runh:
-	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
-	-mfile ${MDIR}/shermanACa/data/shermanACa.mtx_3432x3432_25220nnz.gz \
-	2>&1 | tee log.txt
+#runi:
+#	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh ${GLSA_FLAGS} \
+#	-mfile ${MDIR}/utm3600/data/utm3060.mtx_3060x3060_42211nnz.gz \
+#	-vfile ${MDIR}/utm3600/data/utm3060_b.mtx_3060.gz \
+#	2>&1 | tee log.txt
 
 
-runi:
-	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh ${GLSA_FLAGS} \
-	-mfile ${MDIR}/utm3600/data/utm3060.mtx_3060x3060_42211nnz.gz \
-	-vfile ${MDIR}/utm3600/data/utm3060_b.mtx_3060.gz \
-	2>&1 | tee log.txt
-
-
-runj:
-	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
-	-mfile /home/perif/Data/datasets/utils/scripts/utm1700a.mtx_1700x1700_21313nnz.gz \
-	-vfile /home/perif/Data/datasets/utils/scripts/utm1700a_b.mtx_1700.gz \
-	2>&1 | tee log.txt
+#runj:
+#	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
+#	-mfile /home/perif/Data/datasets/utils/scripts/utm1700a.mtx_1700x1700_21313nnz.gz \
+#	-vfile /home/perif/Data/datasets/utils/scripts/utm1700a_b.mtx_1700.gz \
+#	2>&1 | tee log.txt
 
 
 
-utm3:
-	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
-         -mfile ~/AutoSolverClone/Matrices/utm300.mtx_300x300_3155nnz.gz -vfile ~/AutoSolverClone/Matrices/utm300_b.mtx_300.gz | tee log.txt
+#utm3:
+#	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
+#         -mfile ~/AutoSolverClone/Matrices/utm300.mtx_300x300_3155nnz.gz -vfile ~/AutoSolverClone/Matrices/utm300_b.mtx_300.gz | tee log.txt
 
-utm7:
-	 -@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
-         -mfile ~/Data/utils/scripts/utm1700a.mtx_1700x1700_21313nnz.gz -vfile ~/Data/utils/scripts/utm1700a_b.mtx_1700.gz | tee log.txt
-
-
-utm5:
-	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
-        -mfile ~/Data/Matrices/utm5940/data/utm5940.mtx_5940x5940_83842nnz.gz -vfile ~/Data/Matrices/utm5940/data/utm5940_b.mtx_5940.gz  | tee log.txt
+#utm7:
+#	 -@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
+#         -mfile ~/Data/utils/scripts/utm1700a.mtx_1700x1700_21313nnz.gz -vfile ~/Data/utils/scripts/utm1700a_b.mtx_1700.gz | tee log.txt
 
 
-dwa:
-	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
-	-mfile ~/Data/Matrices/dwa512/data/dwa512.mtx_512x512_2480nnz.gz | tee log.txt
-
-dwb:
-	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
-	-mfile ~/Data/Matrices/dw256A/data/dw256A.mtx_512x512_2480nnz.gz | tee log.txt
+#utm5:
+#	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
+#        -mfile ~/Data/Matrices/utm5940/data/utm5940.mtx_5940x5940_83842nnz.gz -vfile ~/Data/Matrices/utm5940/data/utm5940_b.mtx_5940.gz  | tee log.txt
 
 
-pde:
-	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
-	-mfile ~/Data/Matrices/pde2961/data/pde2961.mtx_2961x2961_14585nnz.gz | tee log.txt
+#dwa:
+#	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
+#	-mfile ~/Data/Matrices/dwa512/data/dwa512.mtx_512x512_2480nnz.gz | tee log.txt
 
-e2:
-	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
-	-mfile ~/Data/Matrices/epb2_a_confirmer/data/epb2.mtx_25228x25228_175027nnz.gz | tee log.txt
+#dwb:
+#	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
+#	-mfile ~/Data/Matrices/dw256A/data/dw256A.mtx_512x512_2480nnz.gz | tee log.txt
 
-e1:
-	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
-	-mfile ~/Data/Matrices/epb1_a_confirmer/data/epb1.mtx_14734x14734_95053nnz.gz | tee log.txt
+
+#pde:
+#	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
+#	-mfile ~/Data/Matrices/pde2961/data/pde2961.mtx_2961x2961_14585nnz.gz | tee log.txt
+
+#e2:
+#	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
+#	-mfile ~/Data/Matrices/epb2_a_confirmer/data/epb2.mtx_25228x25228_175027nnz.gz | tee log.txt
+
+#e1:
+#	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \
+#	-mfile ~/Data/Matrices/epb1_a_confirmer/data/epb1.mtx_14734x14734_95053nnz.gz | tee log.txt
 
 

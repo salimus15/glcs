@@ -9,6 +9,7 @@
 #include "slepceps.h"
 #include <unistd.h>
 #include <sys/stat.h>
+#include <time.h>
 #include "./Solvers/GMRES/gmres.h"
 #include "./Solvers/Arnoldi/arnoldi.h"
 #include "./Libs/read_matrix.h"

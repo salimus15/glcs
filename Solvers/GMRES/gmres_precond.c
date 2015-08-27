@@ -44,12 +44,11 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
     sleep(timing);
   }
 
-
-
   /* received something ? */
   if(nols==0||mpi_lsa_com_array_recv(com,&size_data,data_tmp)){
     return 1;
   }
+      
   #ifdef DEBUG
   else
     PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond Received data from LSQR of size %d\n",(PetscInt)data_tmp[0]);
@@ -182,6 +181,8 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
 #endif
     }
 
+
+	ierr=VecCopy(x_tmp, w1_tmp);CHKERRQ(ierr);
     /* x1= x1+x*/
     ierr=VecAXPY(sol_tmp,1.0,x_tmp);CHKERRQ(ierr);
 
@@ -204,6 +205,7 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
     if(norm>epsilon()){
       PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond norm %e is over epsilon %e\n",norm,epsilon());
 // FIXME:       PetscFunctionReturn(2);
+//return 1;
     }
 
   }
@@ -222,7 +224,7 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
   #endif
 
   if(nols!=0) ierr=VecCopy(sol_tmp,ksp->vec_sol);CHKERRQ(ierr);
-
+/*    if(nols!=0) ierr=VecCopy(vec_tmp,ksp->vec_sol);CHKERRQ(ierr);*/
   ierr=PetscFree(eta);CHKERRQ(ierr);
   ierr=PetscFree(beta);CHKERRQ(ierr);
   ierr=PetscFree(delta);CHKERRQ(ierr);

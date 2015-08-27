@@ -5,7 +5,7 @@ PetscErrorCode LSQR(com_lsa * com, int * vector_size){
 	/* variables */
 	PetscInt end,cumul,eigen_received,eigen_total,eigen_max;
 	char  load_path[PETSC_MAX_PATH_LEN],export_path[PETSC_MAX_PATH_LEN];
-	int i,info,exit_type=0;
+	int i,info,type=0;
 	PetscBool flag,data_load,data_export,continuous_export,data_load_any;
 	PetscScalar * data,*eigen_cumul,*eigen_tri,*d,*c;
 	PetscReal a_ell,c_ell,d_ell,d_reel;
@@ -74,11 +74,14 @@ PetscErrorCode LSQR(com_lsa * com, int * vector_size){
 	eigen_total=0;
 	ls_eigen=0;
 	while(!end){
-		if(!mpi_lsa_com_type_recv(com,&exit_type)){
-		  if(exit_type==666){
+		if(!mpi_lsa_com_type_recv(com,&type)){
+		  if(type==666){
 		    end=1;
 		    PetscPrintf(PETSC_COMM_WORLD,"@} LSQR Receiving Exit message\n");
 		    break;
+		  }else if (type == 911){
+		  	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR Received a SOS message\n");
+		  	mpi_lsa_com_type_send(com,&type);
 		  }
 		}
 

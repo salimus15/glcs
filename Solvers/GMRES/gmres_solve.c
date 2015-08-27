@@ -27,7 +27,10 @@ PetscErrorCode MyKSPSolve_FGMRES(KSP ksp,com_lsa * com)
   PetscInt       cycle_its = 0; /* iterations done in a call to KSPFGMRESCycle */
   KSP_FGMRES     *fgmres   = (KSP_FGMRES*)ksp->data;
   PetscBool      diagonalscale;
-
+  Vec 		  vec_tmp, vec_t;
+  int 		  type = -1, taille =0;
+  Mat 		  Amat,Pmat;
+  
   PetscFunctionBegin;
   ierr = PCGetDiagonalScale(ksp->pc,&diagonalscale);CHKERRQ(ierr);
   if (diagonalscale) SETERRQ1(PetscObjectComm((PetscObject)ksp),PETSC_ERR_SUP,"Krylov method %s does not support diagonal scaling",((PetscObject)ksp)->type_name);
@@ -52,6 +55,28 @@ PetscErrorCode MyKSPSolve_FGMRES(KSP ksp,com_lsa * com)
     ierr = MyKSPFGMRESResidual(ksp);CHKERRQ(ierr);
     if (ksp->its >= ksp->max_it) break;
     ierr = MyKSPFGMRESCycle(&cycle_its,ksp);CHKERRQ(ierr);
+    
+/*    if(!mpi_lsa_com_type_recv(com,&type)){*/
+/*	  if(type==911){*/
+		//   PetscPrintf(PETSC_COMM_WORLD,"$} GMRES received SOS message !!!!!!!!!!!'\n");
+     /*  this is some deprecated especialy for GMRES due to the fact it is expensive and generates a copy the solution vector 
+     but i have ot the choice for now and it is performed only when Anoldi has 0 converged values So lets do it
+	*/
+ 		ierr = VecDuplicate(ksp->vec_sol,&vec_tmp);CHKERRQ(ierr);
+// 		ierr = VecDuplicate(ksp->vec_sol,&vec_t);CHKERRQ(ierr);
+//		ierr = VecCopy(ksp->vec_sol,vec_tmp);CHKERRQ(ierr);
+// 		ierr = PCGetOperators(ksp->pc,&Amat,&Pmat);CHKERRQ(ierr);
+//		KSPBuildSolution(ksp,vec_tmp,NULL);
+		ierr=KSPBuildResidual(ksp,NULL,NULL,&vec_tmp);CHKERRQ(ierr);
+//		ierr=MatMult(Amat,vec_tmp,vec_t);CHKERRQ(ierr);
+//		ierr=VecAYPX(vec_t,-1.,ksp->vec_rhs);CHKERRQ(ierr);
+		
+		ierr=VecGetSize(vec_tmp,&taille);CHKERRQ(ierr);
+		PetscPrintf(PETSC_COMM_WORLD," GMRES  THERE IS %d DATA TO SEND \n",taille);
+		mpi_lsa_com_vec_send(com,&vec_tmp);
+		   
+/*	  }*/
+/*	}*/
   }
   /* mark lack of convergence */
   if (ksp->its >= ksp->max_it && !ksp->reason) ksp->reason = KSP_DIVERGED_ITS;

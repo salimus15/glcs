@@ -25,10 +25,12 @@ PetscErrorCode Father(com_lsa * com, Vec * v){
 		}
 		/* check if there's an incoming message */
 		if(!mpi_lsa_com_vec_recv(com, &vec_tmp_receive)){
-			if(!mpi_lsa_com_vec_recv_validate(com, &vec_tmp_receive)){
+			printf(" =========FATHER   I RECEIVED SOME DATA SO I AM GOING TO CHECK THEM ============\n");
+/*			if(!mpi_lsa_com_vec_recv_validate(com, &vec_tmp_receive)){*/
+				printf(" =========   I RECEIVED SOME DATA SO I AM GOING TO SEND THEM TO ARNOLDI ============\n");
 				vec_tmp=vec_tmp_receive;
 				mpi_lsa_com_vec_send(com,&vec_tmp);
-			}
+/*			}*/
 		}		
 	}
 	

@@ -11,11 +11,13 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 	   we choosed to fix it because mallocs weren't working properly */
 	PetscScalar eigenvalues[1000], ei, er;
 	PetscReal re,im,vnorm;
-	PetscInt eigen_nb,j,i,size,one=1;
+	PetscInt eigen_nb,j,i,size,one=1, taille;
 	Vec initialv,nullv,*vs;
 	PetscBool flag,data_load,data_export,continuous_export,load_any;
-	int exit_type=0;
-
+	int exit_type=0, counter = 0, l;
+	int sos_type = 911;
+	PetscScalar *vecteur_initial;
+	
 	sprintf(load_path,"./arnoldi.bin");
 	sprintf(export_path,"./arnoldi.bin");
 
@@ -50,7 +52,7 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 	for(i=0;i<size;i++){
 		ierr=VecDuplicate(*v,&vs[i]);CHKERRQ(ierr);
 	}
-
+	vecteur_initial = malloc(size * sizeof(PetscScalar));
 
 
 	end=0;
@@ -67,7 +69,10 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 		    break;
 		  }
 		}
-
+		if(!mpi_lsa_com_vec_recv(com, &initialv)){
+				printf(" =========   I RECEIVED SOME DATA FROM GMRES ============\n");
+		}
+		    
 		for(j=0;j<eigen_nb;j++){
 			eigenvalues[j]=(PetscScalar)0.0;
 		}
@@ -77,9 +82,12 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 		  load_any=PETSC_FALSE;
 		  data_load=PETSC_TRUE;
 		}
+		
 		if(!(data_load^=load_any)){
 		  ierr=EPSSetInitialSpace(eps,1,&initialv);CHKERRQ(ierr);
+		  		
 		} else {
+				PetscPrintf(PETSC_COMM_WORLD,"==== > I AM LOADING DATA FROM FILE\n");
 				PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Reading file %s\n",load_path);
 				ierr=readBinaryVecArray(load_path,(int*)one,&initialv);CHKERRQ(ierr);
 				data_load=PETSC_FALSE;
@@ -90,14 +98,24 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 		}
 		#ifdef DEBUG
 	  	printf("*} Arnoldi  initial vector initiated\n");
-		#endif
-
+	
+/*		ierr=VecGetSize(initialv,&taille);CHKERRQ(ierr);*/
+/*		PetscPrintf(PETSC_COMM_WORLD,"==== > OUR INITIALV IS OF SIZE %d\n", taille);*/
+/*  		vecteur_initial = realloc(vecteur_initial,taille);  			*/
+/*  		ierr=VecGetArray(initialv, &vecteur_initial);CHKERRQ(ierr);*/
+/*		for (i = 0; i < taille; i++)*/
+/*			PetscPrintf(PETSC_COMM_WORLD,"==== > initialv[%d] = %e\n", i, vecteur_initial[i]);*/
+/*		ierr= VecRestoreArray(initialv, &vecteur_initial);CHKERRQ(ierr);*/
+/*		*/
+	
+		 #endif 	
 		#ifdef DEBUG
 		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Launching EPSSolve\n");
 		#endif
 		/* compute eigenvalues */
 		ierr=EPSSolve(eps);CHKERRQ(ierr);
-
+		++counter;
+		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Achieved %d Iterations of EPSSolve\n", counter);
 		#ifdef DEBUG
 		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Achieved EPSSolve\n");
 		#endif
@@ -132,24 +150,69 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 			#endif
 
 		}
+		
+/*		ierr=VecGetSize(initialv,&taille);CHKERRQ(ierr);*/
+/*		PetscPrintf(PETSC_COMM_WORLD,"==== > OUR INITIALV IS OF SIZE %d\n", taille);*/
+/*  		vecteur_initial = realloc(vecteur_initial,taille);  			*/
+/*  		ierr=VecGetArray(initialv, &vecteur_initial);CHKERRQ(ierr);*/
+/*		for (i = 0; i < taille; i++)*/
+/*			PetscPrintf(PETSC_COMM_WORLD,"==== > initialv[%d] = %e\n", i, vecteur_initial[i]);*/
+/*		ierr= VecRestoreArray(initialv, &vecteur_initial);CHKERRQ(ierr);*/
+/*		*/
+		if( eigen_nb != 0){
 		#ifdef DEBUG
 		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi  Sending to LS\n");
 		#endif
 		/* send the data array */
 		mpi_lsa_com_array_send(com, &eigen_nb, eigenvalues);
+		
+			/*construct new initial vector*/
+			ierr=EPSGetInvariantSubspace(eps, vs);CHKERRQ(ierr);
+			ierr=VecCopy(vs[0],initialv);CHKERRQ(ierr);
+		
+		
+			for(j=1;j<eigen_nb;j++){
+				ierr=VecAYPX(initialv,(PetscScalar)1.0,vs[j]);
+			}
+		
+			ierr=VecNorm(initialv,NORM_2,&vnorm);CHKERRQ(ierr);
+			ierr=VecAYPX(initialv,(PetscScalar)(1.0/vnorm),nullv);CHKERRQ(ierr);
+			
+	  		if(continuous_export){
+		  		ierr=writeBinaryVecArray(data_export?export_path:"./arnoldi.bin", 1, &initialv);
+			}
+				
+  		}else{
+  			
+  			// this was my first try to solve the poblem but it doesn't work better 
+/*  			ierr=VecSetRandom(initialv,PETSC_NULL);CHKERRQ(ier);*/
+	// Now the best to do i think is to develop a kind of help from GMRES 
+	// Arnoldi when no convergence observed will send a msg to GMRES like an SOS 
+	//and GMRES will send a vector wich will be used to generate a new initial vector that make arnoldi converge **I HOPE **
+  			 mpi_lsa_com_type_send(com,&sos_type); // here we send the message 
+  		//	 ierr=VecDuplicate(initialv,&vec_tmp_receive);
+  			PetscPrintf(PETSC_COMM_WORLD, "!!! Arnoldi has not converged so we change the initial vector !!!\n");
+  			 /* check if there's an incoming message */
+checking:      if(!mpi_lsa_com_vec_recv(com, &initialv)){
+				printf(" =========   I RECEIVED SOME DATA FROM GMRES ============\n");
 
-		/*construct new initial vector*/
-		ierr=EPSGetInvariantSubspace(eps, vs);CHKERRQ(ierr);
-		ierr=VecCopy(vs[0],initialv);CHKERRQ(ierr);
-		for(j=1;j<eigen_nb;j++){
-			ierr=VecAYPX(initialv,(PetscScalar)1.0,vs[j]);
-		}
-		ierr=VecNorm(initialv,NORM_2,&vnorm);CHKERRQ(ierr);
-		ierr=VecAYPX(initialv,(PetscScalar)(1.0/vnorm),nullv);CHKERRQ(ierr);
+		     }else{
+		     	if(!mpi_lsa_com_type_recv(com,&exit_type)){
+			      if(exit_type==666){
+				    end=1;
+				    PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Sending Exit message\n");
 
-		if(continuous_export){
-		  ierr=writeBinaryVecArray(data_export?export_path:"./arnoldi.bin", 1, &initialv);
-		}
+				    mpi_lsa_com_type_send(com,&exit_type);
+				    break;
+				  }
+				}
+      			goto checking;
+		     	//return 1;
+		     }			 
+  		}
+  		
+  		// i will check it later 	
+		
 	}
 
 
