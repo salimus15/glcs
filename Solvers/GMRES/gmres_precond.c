@@ -31,13 +31,15 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
   ierr=PetscOptionsGetInt(PETSC_NULL,"-ksp_ls_m_hang",&hang,&flag);CHKERRQ(ierr);
   if(!flag) hang=ksp->max_it;
   ierr=PetscOptionsGetInt(PETSC_NULL,"-ksp_ls_nols",&nols,&flag);CHKERRQ(ierr);
-  if(!flag) nols=1;
+  if(!flag) {nols=1;}else{nols=0;}
   ierr=PetscOptionsGetInt(PETSC_NULL,"-ksp_ls_timing",&timing,&flag);CHKERRQ(ierr);
   if(!flag) timing=60;
 
+	
+
   latency_count++;
 
-  if((latency_count%latency==0  && ksp->its>0) || ksp->its==2){
+  if(((latency_count%latency==0  && ksp->its>0) || ksp->its==2) && nols){
     #ifdef DEBUG
     PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond at %d its must wait %d seconds (soit %d minutes et %d secondes) before using LSQR\n",ksp->its,timing,timing/60,timing%60);
     #endif

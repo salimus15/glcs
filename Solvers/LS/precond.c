@@ -53,12 +53,12 @@ PetscErrorCode LSPrecond(PetscReal a_ell, PetscReal d_ell, PetscReal c_ell,
 	}
 	*alpha=c_ell;
 
-	#ifdef DEBUG
-	for(i=0;i<*nb_eigen_all;i++){
-	  PetscPrintf(PETSC_COMM_WORLD,"@} LSQR beta[%d]=%e delta[%d]=%e \n",i,(PetscReal)beta[i],i,(PetscReal)delta[i]);
-	}
-	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => COMPUTING M MATRIX\n");
-	#endif
+/*	#ifdef DEBUG*/
+/*	for(i=0;i<*nb_eigen_all;i++){*/
+/*	  PetscPrintf(PETSC_COMM_WORLD,"@} LSQR beta[%d]=%e delta[%d]=%e \n",i,(PetscReal)beta[i],i,(PetscReal)delta[i]);*/
+/*	}*/
+/*	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => COMPUTING M MATRIX\n");*/
+/*	#endif*/
 
 
 
@@ -130,14 +130,14 @@ PetscErrorCode LSPrecond(PetscReal a_ell, PetscReal d_ell, PetscReal c_ell,
 	MatAssemblyBegin(MM,MAT_FINAL_ASSEMBLY);
 	MatAssemblyEnd(MM,MAT_FINAL_ASSEMBLY);
 
-	#ifdef DEBUGDATA
-	PetscViewerSetFormat(PETSC_VIEWER_STDOUT_WORLD,PETSC_VIEWER_ASCII_MATLAB );
- 	MatView(MM,PETSC_VIEWER_STDOUT_WORLD);
-	#endif
+/*	#ifdef DEBUGDATA*/
+/*	PetscViewerSetFormat(PETSC_VIEWER_STDOUT_WORLD,PETSC_VIEWER_ASCII_MATLAB );*/
+/* 	MatView(MM,PETSC_VIEWER_STDOUT_WORLD);*/
+/*	#endif*/
 
-	#ifdef DEBUG
-	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => PROCESSING TO CHOLESKY FACTORIZATION\n");
-	#endif
+/*	#ifdef DEBUG*/
+/*	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => PROCESSING TO CHOLESKY FACTORIZATION\n");*/
+/*	#endif*/
 
 	/*proceed to factorization*/
 	ierr=KSPCreate(PETSC_COMM_WORLD,&kspchol);CHKERRQ(ierr);
@@ -147,9 +147,9 @@ PetscErrorCode LSPrecond(PetscReal a_ell, PetscReal d_ell, PetscReal c_ell,
 	ierr=PCSetType(pcchol,PCCHOLESKY);CHKERRQ(ierr);
 	ierr=KSPSetUp(kspchol);CHKERRQ(ierr);
 
-	#ifdef DEBUG
-	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => CHOLESKY DONE, EXTRACTING FACTORIZED MATRIX\n");
-	#endif
+/*	#ifdef DEBUG*/
+/*	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => CHOLESKY DONE, EXTRACTING FACTORIZED MATRIX\n");*/
+/*	#endif*/
 	/*get factor matrix*/
 	MatCreateSeqDense(PETSC_COMM_WORLD,(*nb_eigen_all)+1,(*nb_eigen_all)+1,PETSC_NULL,&fact);
 	// MatSetFromOptions(fact);
@@ -157,25 +157,25 @@ PetscErrorCode LSPrecond(PetscReal a_ell, PetscReal d_ell, PetscReal c_ell,
 	MatAssemblyEnd(fact,MAT_FINAL_ASSEMBLY);
 
 	ierr=PCFactorGetMatrix(pcchol,&fact); CHKERRQ(ierr);
-	#ifdef DEBUGDATA
-	PetscViewerSetFormat(PETSC_VIEWER_STDOUT_WORLD,PETSC_VIEWER_ASCII_MATLAB );
- 	MatView(fact,PETSC_VIEWER_STDOUT_WORLD);
-	#endif
+/*	#ifdef DEBUGDATA*/
+/*	PetscViewerSetFormat(PETSC_VIEWER_STDOUT_WORLD,PETSC_VIEWER_ASCII_MATLAB );*/
+/* 	MatView(fact,PETSC_VIEWER_STDOUT_WORLD);*/
+/*	#endif*/
 
-	#ifdef DEBUG
-	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => CREATING F MATRIX\n");
-	#endif
+/*	#ifdef DEBUG*/
+/*	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => CREATING F MATRIX\n");*/
+/*	#endif*/
 
 	/*Create the matrix operator that will be used in the QR factorization*/
 	MatCreateSeqDense(PETSC_COMM_WORLD,(*nb_eigen)+1,(*nb_eigen)+1,PETSC_NULL,&F);
 
-	#ifdef DEBUG
-	for(j=0;j<*nb_eigen;j++){
-	  PetscPrintf(PETSC_COMM_WORLD,"@} LSQR beta[%d]=%e delta[%d]=%e alpha=%e\n",
-	    j,(PetscReal)beta[j],j,(PetscReal)delta[j],(PetscReal)*alpha
-	  );
-	}
-	#endif
+/*	#ifdef DEBUG*/
+/*	for(j=0;j<*nb_eigen;j++){*/
+/*	  PetscPrintf(PETSC_COMM_WORLD,"@} LSQR beta[%d]=%e delta[%d]=%e alpha=%e\n",*/
+/*	    j,(PetscReal)beta[j],j,(PetscReal)delta[j],(PetscReal)*alpha*/
+/*	  );*/
+/*	}*/
+/*	#endif*/
 
 	/*get matrix array, fact is of dense format so wouldn't be a problem for addressing*/
 	ierr=MatDenseGetArray(fact,&fact_tmp);CHKERRQ(ierr);
@@ -227,19 +227,19 @@ PetscErrorCode LSPrecond(PetscReal a_ell, PetscReal d_ell, PetscReal c_ell,
 	VecGetLocalSize(soln,&vssizel);
 	VecGetLocalSize(rhs,&vrsizel);
 
-	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR Sizes Mat(%d ; %d) = (%d ; %d) Vec sol = (%d) (%d) Vec rhs = (%d) (%d)\n",
-	    mgsizex,mgsizey,mlsizex,mlsizey,vssizeg,vssizel,vrsizeg,vrsizel
-	);
+/*	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR Sizes Mat(%d ; %d) = (%d ; %d) Vec sol = (%d) (%d) Vec rhs = (%d) (%d)\n",*/
+/*	    mgsizex,mgsizey,mlsizex,mlsizey,vssizeg,vssizel,vrsizeg,vrsizel*/
+/*	);*/
 	#endif
 
-	#ifdef DEBUGDATA
- 	PetscViewerSetFormat(PETSC_VIEWER_STDOUT_WORLD,PETSC_VIEWER_ASCII_MATLAB );
- 	MatView(F,PETSC_VIEWER_STDOUT_WORLD);
-	#endif
+/*	#ifdef DEBUGDATA*/
+/* 	PetscViewerSetFormat(PETSC_VIEWER_STDOUT_WORLD,PETSC_VIEWER_ASCII_MATLAB );*/
+/* 	MatView(F,PETSC_VIEWER_STDOUT_WORLD);*/
+/*	#endif*/
 
-	#ifdef DEBUG
-	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => COMPUTE LSQR\n");
-	#endif
+/*	#ifdef DEBUG*/
+/*	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => COMPUTE LSQR\n");*/
+/*	#endif*/
 	/*create the lsqr solver context and set it up*/
 	ierr=KSPCreate(PETSC_COMM_WORLD,&ksplsqr);CHKERRQ(ierr);
 	ierr=KSPSetOperators(ksplsqr,F,F);CHKERRQ(ierr);
@@ -255,10 +255,10 @@ PetscErrorCode LSPrecond(PetscReal a_ell, PetscReal d_ell, PetscReal c_ell,
 	ierr = KSPSolve(ksplsqr, rhs, soln); CHKERRQ(ierr);
 	int its;
 	KSPGetIterationNumber(ksplsqr,&its);
-	#ifdef DEBUG
-	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => LSQR COMPUTED\n");
-	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR Number of LSQR iterations = %d\n",its);
-	#endif
+/*	#ifdef DEBUG*/
+/*	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR => LSQR COMPUTED\n");*/
+/*	PetscPrintf(PETSC_COMM_WORLD,"@} LSQR Number of LSQR iterations = %d\n",its);*/
+/*	#endif*/
 
 	/* extract solution elements and place them into eta*/
 	ierr = VecGetArray(soln,&res);
@@ -266,9 +266,9 @@ PetscErrorCode LSPrecond(PetscReal a_ell, PetscReal d_ell, PetscReal c_ell,
  	for(i=0;i<*nb_eigen_all;i++){
 	  eta[i]=(PetscScalar)res[i];
 
-	  #ifdef DEBUG
- 	  PetscPrintf(PETSC_COMM_WORLD,"@} %d LSQR eta[%d]=%e beta[%d]=%e delta[%d]=%e \n",i,(PetscReal)eta[i],i,(PetscReal)beta[i],i,(PetscReal)delta[i]);
-	  #endif
+/*	  #ifdef DEBUG*/
+/* 	  PetscPrintf(PETSC_COMM_WORLD,"@} %d LSQR eta[%d]=%e beta[%d]=%e delta[%d]=%e \n",i,(PetscReal)eta[i],i,(PetscReal)beta[i],i,(PetscReal)delta[i]);*/
+/*	  #endif*/
 	}
 
 	ierr = VecRestoreArray(soln,&res);

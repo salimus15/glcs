@@ -7,8 +7,10 @@ PetscErrorCode Father(com_lsa * com, Vec * v){
 	Vec vec_tmp_receive, vec_tmp;
 	PetscInt end;
 	PetscErrorCode ierr;	
-	int exit_type=0;	
+	int exit_type=0, i ;	
 	end=0;
+	MPI_Status status;
+	int flag;
 	
 	ierr=VecDuplicate(*v,&vec_tmp);CHKERRQ(ierr);
 	ierr=VecDuplicate(*v,&vec_tmp_receive);CHKERRQ(ierr);
@@ -19,10 +21,21 @@ PetscErrorCode Father(com_lsa * com, Vec * v){
 		    end=1;
 		    PetscPrintf(PETSC_COMM_WORLD,"$} Father Sending Exit message\n");
 
-		    mpi_lsa_com_type_send(com,&exit_type);
-		    break;
+		 		    
+		    for(i=0;i<com->out_vec_sended;i++){
+		
+				MPI_Test(&(com->vec_requests[i]),&flag,&status);
+				/* if not cancel it */
+				if(!flag){					
+					/* we update the vector to send to the latest version */
+				 	MPI_Cancel(&(com->vec_requests[i]));				
+				}
+		    }
+		    	mpi_lsa_com_type_send(com,&exit_type);
+		  		break;
 		  }
-		}
+	   }
+	
 		/* check if there's an incoming message */
 		if(!mpi_lsa_com_vec_recv(com, &vec_tmp_receive)){
 			printf(" =========FATHER   I RECEIVED SOME DATA SO I AM GOING TO CHECK THEM ============\n");
@@ -32,11 +45,6 @@ PetscErrorCode Father(com_lsa * com, Vec * v){
 				mpi_lsa_com_vec_send(com,&vec_tmp);
 /*			}*/
 		}		
-	}
-	
-	
-	
-	
-	
+	}	
 	return 0;
 }

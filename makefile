@@ -19,9 +19,8 @@ MDIR=./data
 ##################################################################
 ##################      Tuning  FLAGS      #######################
 ##################################################################
-
-RESTART_MAX= 200
-RESTART_MIN=  3
+RESTART_MAX = 150
+RESTART_MIN =  3
 RESTART_INCREMENT = 3
 RESTART_STRATEGY = none
 RESTART_FULL_TYPE = none
@@ -39,30 +38,31 @@ ORTHOG = -iorthog_type ${ORTHOG_TYPE} -iorthog_size ${ORTHOG_SIZE} -iorthog_heur
 # DEBUG_VALGRIND = valgrind --tool=memcheck -q
 DEBUG_KSP_VIEW = -ksp_view
 #gmres options
-GMRES_PRECISION = 1e-20
-GMRES_RESTART = ${RESTART_MAX}
-GMRES_NB_NODES = 1
-GMRES_MONITOR = -ksp_monitor_true_residual
-GMRES_FLAGS = -ksp_rtol 1e-100 -ksp_divtol 1e1000 -ksp_max_it 7000 -pc_type none -ksp_atol ${GMRES_PRECISION} -ksp_gmres_restart ${GMRES_RESTART}\
+GMRES_PRECISION= 1e-15
+GMRES_RESTART= ${RESTART_MAX}
+GMRES_NB_NODES= 1
+GMRES_MONITOR= -ksp_monitor_true_residual
+GMRES_FLAGS= -ksp_rtol 1e-100 -ksp_divtol 1e1000 -ksp_max_it 7000 -pc_type none -ksp_atol ${GMRES_PRECISION} -ksp_gmres_restart ${GMRES_RESTART}\
 		${GMRES_MONITOR} ${GMRES_VIEW} -lsa_gmres ${GMRES_NB_NODES} ${RESTART} ${ORTHOG}
 #arnoldi options
-ARNOLDI_PRECISION = 1e-5
-ARNOLDI_NBEIGEN = 50
-ARNOLDI_NB_NODES = 1
+ARNOLDI_PRECISION= 1e-5
+ARNOLDI_NBEIGEN= 60
+ARNOLDI_NB_NODES= 1
 #ARNOLDI_LOAD_INITIAL = -ksp_arnoldi_load
 #ARNOLDI_MONITOR = -eps_monitor
 # ARNOLDI_LOAD_ANY = -ksp_arnoldi_load_any
-ARNOLDI_FLAGS = -eps_type arnoldi -eps_true_residual -eps_largest_imaginary -eps_nev ${ARNOLDI_NBEIGEN} -eps_tol ${ARNOLDI_PRECISION} \
+ARNOLDI_FLAGS= -eps_type arnoldi -eps_true_residual -eps_largest_imaginary -eps_nev ${ARNOLDI_NBEIGEN} -eps_tol ${ARNOLDI_PRECISION} \
 		${ARNOLDI_MONITOR} -lsa_arnoldi ${ARNOLDI_NB_NODES} -eps_max_it 5 -ksp_arnoldi_cexport ${ARNOLDI_LOAD_ANY}
 #ls options
-LS_POWER = 10
+LS_POWER = 5
 LS_POLY_APPL = 10
 LS_LATENCY = 2
 LS_PC_USE = 1
-LS_HANG_IT = 7000
-LS_HANG_TIME =  1
+LS_NO_USE_LS= -ksp_ls_nols
+LS_HANG_IT= 7000
+LS_HANG_TIME=  1
 # LS_LOAD_ANY = -ksp_ls_load_any
-LS_FLAGS = -ksp_ls_power ${LS_POWER} -ksp_ls_m_hang ${LS_HANG_IT} -ksp_ls_timing ${LS_HANG_TIME}  -ksp_ls_k_param ${LS_POLY_APPL} -ksp_ls_nopc ${LS_PC_USE} -ksp_ls_latency ${LS_LATENCY} -ksp_ls_cexport ${LS_LOAD_ANY}
+LS_FLAGS = -ksp_ls_power ${LS_POWER} ${LS_NO_USE_LS}-ksp_ls_m_hang ${LS_HANG_IT} -ksp_ls_timing ${LS_HANG_TIME}  -ksp_ls_k_param ${LS_POLY_APPL} -ksp_ls_nopc ${LS_PC_USE} -ksp_ls_latency ${LS_LATENCY} -ksp_ls_cexport ${LS_LOAD_ANY}
 #final flag composition  ${DEBUGG}
 GLSA_FLAGS = ${GMRES_FLAGS} ${ARNOLDI_FLAGS} ${LS_FLAGS} ${DEBUG_KSP_VIEW}
 MPI_NODES = ${shell echo ${GMRES_NB_NODES}+${ARNOLDI_NB_NODES}+2 | bc}
@@ -163,13 +163,15 @@ runs:
 
 # No convergence observed
 runx:
-	 ${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND}  ./hyperh ${GLSA_FLAGS} -mfile ${MDIR}/utm300.mtx_300x300_3155nnz
+	 ${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND}  ./hyperh ${GLSA_FLAGS} \
+	 -mfile ${MDIR}/utm300.mtx_300x300_3155nnz \
+	 2>&1 | tee ./resultats/gmres_vs_glsa/utm300M${RESTART_MAX}_LSA${LS_PC_USE}.txt ; rm *.bin
 
 # no convergence for gmres alone and divergence using LS
 runa:
 	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh ${GLSA_FLAGS} \
 	-mfile ${MDIR}/utm1700a.mtx_1700x1700_21313nnz  \
-	2>&1 | tee ./resultats/log1700b_m${RESTART_MAX}_ls${LS_PC_USE}_ma${ARNOLDI_NBEIGEN}_lsp${LS_POWER}_lsa${LS_POLY_APPL}_f${LS_LATENCY}.txt ; rm *.bin
+	2>&1 | tee ./resultats/gmres_vs_glsa/utm1700M${RESTART_MAX}_LSA${LS_PC_USE}.txt ; rm *.bin
 # gmres alone has a very good convergence
 runy:
 	-@${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh  ${GLSA_FLAGS} \

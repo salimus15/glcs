@@ -26,13 +26,17 @@ PetscErrorCode MyKSPSolve_FGMRES(KSP ksp,com_lsa * com)
   PetscErrorCode ierr;
   PetscInt       cycle_its = 0; /* iterations done in a call to KSPFGMRESCycle */
   KSP_FGMRES     *fgmres   = (KSP_FGMRES*)ksp->data;
-  PetscBool      diagonalscale;
+  PetscBool      diagonalscale, flag;
   Vec 		  vec_tmp, vec_t;
   int 		  type = -1, taille =0;
   Mat 		  Amat,Pmat;
+  PetscInt nbr_prec =0;
   
   PetscFunctionBegin;
-  ierr = PCGetDiagonalScale(ksp->pc,&diagonalscale);CHKERRQ(ierr);
+	
+	ierr=PetscOptionsGetInt(PETSC_NULL,"-ksp_ls_k_param",&nbr_prec,&flag);CHKERRQ(ierr);
+	
+	ierr = PCGetDiagonalScale(ksp->pc,&diagonalscale);CHKERRQ(ierr);
   if (diagonalscale) SETERRQ1(PetscObjectComm((PetscObject)ksp),PETSC_ERR_SUP,"Krylov method %s does not support diagonal scaling",((PetscObject)ksp)->type_name);
 
   ierr     = PetscObjectSAWsTakeAccess((PetscObject)ksp);CHKERRQ(ierr);
@@ -50,8 +54,12 @@ PetscErrorCode MyKSPSolve_FGMRES(KSP ksp,com_lsa * com)
 
   ierr = MyKSPFGMRESCycle(&cycle_its,ksp);CHKERRQ(ierr);
   while (!ksp->reason) {
-    if(!GmresLSAPrecond(com,ksp))
-      PetscPrintf(PETSC_COMM_WORLD,"Préconditionnement LSA à %d itérations\n",ksp->its);
+  	  if(nbr_prec > 0){
+		 if(!GmresLSAPrecond(com,ksp)){
+		   PetscPrintf(PETSC_COMM_WORLD,"Préconditionnement LSA à %d itérations\n",ksp->its);
+		  	nbr_prec--; 
+		 }
+		}
     ierr = MyKSPFGMRESResidual(ksp);CHKERRQ(ierr);
     if (ksp->its >= ksp->max_it) break;
     ierr = MyKSPFGMRESCycle(&cycle_its,ksp);CHKERRQ(ierr);
@@ -71,6 +79,8 @@ PetscErrorCode MyKSPSolve_FGMRES(KSP ksp,com_lsa * com)
 //		ierr=MatMult(Amat,vec_tmp,vec_t);CHKERRQ(ierr);
 //		ierr=VecAYPX(vec_t,-1.,ksp->vec_rhs);CHKERRQ(ierr);
 		
+		
+		/* Step of Sending  to Arnoldi Under some conditions*/
 		ierr=VecGetSize(vec_tmp,&taille);CHKERRQ(ierr);
 		PetscPrintf(PETSC_COMM_WORLD," GMRES  THERE IS %d DATA TO SEND \n",taille);
 		mpi_lsa_com_vec_send(com,&vec_tmp);
