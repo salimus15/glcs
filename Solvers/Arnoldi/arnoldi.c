@@ -169,12 +169,12 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 			eigenvalues[j]=(PetscScalar)re+PETSC_i*(PetscScalar)im;
 
 
-	 		#ifdef DEBUG
+//	 		#ifdef DEBUG
 				if(im!=0.0)
 				  PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi %d/%d val : %e %e\n",j,eigen_nb,re,im);
 				else
 				  PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi  %d/%d val : %e\n",j,eigen_nb,er);
-			#endif
+//			#endif
 
 		}
 		
