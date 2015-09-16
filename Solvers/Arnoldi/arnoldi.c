@@ -88,7 +88,7 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 		}
 		    
 
-		for(j=0;j<eigen_nb;j++){tialv
+		for(j=0;j<eigen_nb;j++){
 			eigenvalues[j]=(PetscScalar)0.0;
 		}
 
@@ -98,7 +98,7 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 		  data_load=PETSC_TRUE;
 		}
 		  ierr = VecAssemblyBegin(initialv);CHKERRQ(ierr);
-  		  ierr = VecAssemblyEnd(ini);CHKERRQ(ierr);
+  		  ierr = VecAssemblyEnd(initialv);CHKERRQ(ierr);
 		if(!(data_load^=load_any)){
 		  ierr=EPSSetInitialSpace(eps,1,&initialv);CHKERRQ(ierr);
 		  		
