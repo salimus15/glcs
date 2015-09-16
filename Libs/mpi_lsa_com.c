@@ -422,7 +422,7 @@ int mpi_lsa_com_vec_recv_validate(com_lsa * com, Vec * v, int size){
 	   MPI_Allreduce( &local_size, &global_size, 1, MPI_INT, MPI_SUM, com->com_group);
 	   if(global_size == size){
 	   	
-	   	   ierr=VecGetSize(v,&local_size);CHKERRQ(ierr);
+	   	   ierr=VecGetSize(*v,&local_size);CHKERRQ(ierr);
 		   if(size == local_size){
 		        ierr=VecGetArray(*v,&array);CHKERRQ(ierr);
 			   for(i=0;i<local_size;i++)
