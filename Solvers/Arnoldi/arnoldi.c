@@ -97,11 +97,15 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 		  load_any=PETSC_FALSE;
 		  data_load=PETSC_TRUE;
 		}
+
 		  ierr = VecAssemblyBegin(initialv);CHKERRQ(ierr);
   		  ierr = VecAssemblyEnd(initialv);CHKERRQ(ierr);
+
+		
+
 		if(!(data_load^=load_any)){
 		  ierr=EPSSetInitialSpace(eps,1,&initialv);CHKERRQ(ierr);
-		  		
+			  		
 		} else {
 				PetscPrintf(PETSC_COMM_WORLD,"==== > I AM LOADING DATA FROM FILE\n");
 				PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Reading file %s\n",load_path);
@@ -174,14 +178,14 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 
 		}
 		
-/*		ierr=VecGetSize(initialv,&taille);CHKERRQ(ierr);*/
-/*		PetscPrintf(PETSC_COMM_WORLD,"==== > OUR INITIALV IS OF SIZE %d\n", taille);*/
-/*  		vecteur_initial = realloc(vecteur_initial,taille);  			*/
-/*  		ierr=VecGetArray(initialv, &vecteur_initial);CHKERRQ(ierr);*/
-/*		for (i = 0; i < taille; i++)*/
-/*			PetscPrintf(PETSC_COMM_WORLD,"==== > initialv[%d] = %e\n", i, vecteur_initial[i]);*/
-/*		ierr= VecRestoreArray(initialv, &vecteur_initial);CHKERRQ(ierr);*/
-/*		*/
+		ierr=VecGetSize(initialv,&taille);CHKERRQ(ierr);
+		PetscPrintf(PETSC_COMM_WORLD,"==== > OUR INITIALV IS OF SIZE %d\n", taille);
+  		vecteur_initial = realloc(vecteur_initial,taille);  			
+  		ierr=VecGetArray(initialv, &vecteur_initial);CHKERRQ(ierr);
+		for (i = 0; i < taille; i++)
+			PetscPrintf(PETSC_COMM_WORLD,"==== > initialv[%d] = %e\n", i, vecteur_initial[i]);
+		ierr= VecRestoreArray(initialv, &vecteur_initial);CHKERRQ(ierr);
+		
 		if( eigen_nb != 0){
 /*		#ifdef DEBUG*/
 /*		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi  Sending to LS\n");*/
