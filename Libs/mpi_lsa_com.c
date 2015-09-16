@@ -267,7 +267,7 @@ int mpi_lsa_com_array_send(com_lsa * com, int * size, PetscScalar * data){
 		MPI_Isend(com->array_out_sended_buffer,*size,MPIU_SCALAR,i,i,com->out_com,&(com->array_requests[i]));
 		com->out_vec_sended++;
 	}
-	printf(" \n\n there is %d message sended \n\n");
+	printf(" \n\n there is %d message sended \n\n",*size);
 	return 0;
 }
 
