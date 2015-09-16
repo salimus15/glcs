@@ -169,12 +169,12 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 			eigenvalues[j]=(PetscScalar)re+PETSC_i*(PetscScalar)im;
 
 
-/*	 		#ifdef DEBUG*/
-/*				if(im!=0.0)*/
-/*				  PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi %d/%d val : %e %e\n",j,eigen_nb,re,im);*/
-/*				else*/
-/*				  PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi  %d/%d val : %e\n",j,eigen_nb,er);*/
-/*			#endif*/
+	 		#ifdef DEBUG
+				if(im!=0.0)
+				  PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi %d/%d val : %e %e\n",j,eigen_nb,re,im);
+				else
+				  PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi  %d/%d val : %e\n",j,eigen_nb,er);
+			#endif
 
 		}
 		
@@ -204,7 +204,7 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 		
 			ierr=VecNorm(initialv,NORM_2,&vnorm);CHKERRQ(ierr);
 			ierr=VecAYPX(initialv,(PetscScalar)(1.0/vnorm),nullv);CHKERRQ(ierr);
-			
+				
 	  		if(continuous_export){
 		  		ierr=writeBinaryVecArray(data_export?export_path:"./arnoldi.bin", 1, &initialv);
 			}
