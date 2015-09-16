@@ -101,7 +101,7 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 		  ierr = VecAssemblyBegin(initialv);CHKERRQ(ierr);
   		  ierr = VecAssemblyEnd(initialv);CHKERRQ(ierr);
 
-		
+		ierr = VecView(initialv,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);
 
 		if(!(data_load^=load_any)){
 		  ierr=EPSSetInitialSpace(eps,1,&initialv);CHKERRQ(ierr);
