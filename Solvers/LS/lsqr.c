@@ -255,9 +255,9 @@ PetscErrorCode LSQR(com_lsa * com, int * vector_size){
 
 	}
 
-	if(data_export){
-		ierr=writeBinaryScalarArray(export_path, cumul, eigen_tri);
-	}
+/*	if(data_export){*/
+/*		ierr=writeBinaryScalarArray(export_path, cumul, eigen_tri);*/
+/*	}*/
 
 	/* Free the arrays */
 	PetscFree(eigen_tri);

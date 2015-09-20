@@ -46,13 +46,13 @@ GMRES_FLAGS= -ksp_rtol 1e-100 -ksp_divtol 1e1000 -ksp_max_it 7000 -pc_type none 
 		${GMRES_MONITOR} ${GMRES_VIEW} -lsa_gmres ${GMRES_NB_NODES} ${RESTART} ${ORTHOG}
 #arnoldi options
 ARNOLDI_PRECISION= 1e-5
-ARNOLDI_NBEIGEN= 60
+ARNOLDI_NBEIGEN= 20
 ARNOLDI_NB_NODES= 1
 #ARNOLDI_LOAD_INITIAL = -ksp_arnoldi_load
 #ARNOLDI_MONITOR = -eps_monitor
 # ARNOLDI_LOAD_ANY = -ksp_arnoldi_load_any
 ARNOLDI_FLAGS= -eps_type arnoldi -eps_true_residual -eps_largest_imaginary -eps_nev ${ARNOLDI_NBEIGEN} -eps_tol ${ARNOLDI_PRECISION} \
-		${ARNOLDI_MONITOR} -lsa_arnoldi ${ARNOLDI_NB_NODES} -eps_max_it 5 -ksp_arnoldi_cexport ${ARNOLDI_LOAD_ANY}
+		${ARNOLDI_MONITOR} -lsa_arnoldi ${ARNOLDI_NB_NODES} -eps_max_it 10 -ksp_arnoldi_cexport ${ARNOLDI_LOAD_ANY} 
 #ls options
 LS_POWER = 5
 LS_POLY_APPL = 10
@@ -163,9 +163,9 @@ runs:
 
 # No convergence observed
 runx:
-	 ${MPIEXEC} -np ${MPI_NODES} ${DEBUG_VALGRIND}  ./hyperh ${GLSA_FLAGS} \
+	 ${MPIEXEC}  -np  ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh ${GLSA_FLAGS} \
 	 -mfile ${MDIR}/utm300.mtx_300x300_3155nnz \
-	 2>&1 | tee ./resultats/gmres_vs_glsa/utm300M${RESTART_MAX}_LSA${LS_PC_USE}.txt ; rm *.bin
+	 2>&1 | tee ./resultats/gmres_vs_glsa/utm300M${RESTART_MAX}_LSA${LS_PC_USE}.txt 
 
 # no convergence for gmres alone and divergence using LS
 runa:
