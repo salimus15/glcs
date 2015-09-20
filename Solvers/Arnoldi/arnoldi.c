@@ -139,7 +139,7 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 /*		#endif*/
 //		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi errest = %e \n",eps->errest );
 	
-		ierr = VecView(initialv,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);
+/*		ierr = VecView(initialv,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);*/
 		/* compute eigenvalues */
 
 //		 ierr=EPSSetUp(eps);CHKERRQ(ierr);
