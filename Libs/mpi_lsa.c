@@ -163,7 +163,7 @@ int mpi_lsa_create_intercoms(com_lsa * com){
 	else if(com->color_group==2) printf("ARNOLDI : ");
 	else if(com->color_group==3) printf("LS :      ");
 
-	printf("%d: %d (%d) -> %d (%d) -> %d (%d)\n",com->rank_world,com->master.com[prev],prev_size,com->color_group,size,com->master.com[next],next_size);
+	printf("%d: %d (%d) -> %d (%d) -> %d (%d)   out_num: %d,  out_com: %d\n",com->rank_world,com->master.com[prev],prev_size,com->color_group,size,com->master.com[next],next_size, com->out_number, com->out_com);
 
 	return 0;
 }
