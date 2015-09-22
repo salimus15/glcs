@@ -103,6 +103,7 @@ int mpi_lsa_com_vec_send(com_lsa * com, Vec * v){
 	PetscErrorCode ierr;
 	MPI_Status status;
 	int flag;
+	int out_com_size;
 
 
 	/* check if previous requests where completed */
@@ -151,9 +152,9 @@ int mpi_lsa_com_vec_send(com_lsa * com, Vec * v){
 /*********************************************************************************** 
 ***************** 		TO SEE 		********************************************
 ***********************************************************************************/
-
+	MPI_Comm_remote_size(com->out_com, &out_com_size);
 	/* for each node in the out domain */
-	for(i=0;i<com->out_number;i++){
+	for(i=0;i<out_com_size;i++){
 		/* compute array displacement */
 		if(i<1)
 			incr=0;
