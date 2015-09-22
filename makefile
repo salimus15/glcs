@@ -40,19 +40,19 @@ DEBUG_KSP_VIEW = -ksp_view
 #gmres options
 GMRES_PRECISION= 1e-15
 GMRES_RESTART= ${RESTART_MAX}
-GMRES_NB_NODES= 1
-GMRES_MONITOR= -ksp_monitor_true_residual
+GMRES_NB_NODES= 3
+#GMRES_MONITOR= -ksp_monitor_true_residual
 GMRES_FLAGS= -ksp_rtol 1e-100 -ksp_divtol 1e1000 -ksp_max_it 7000 -pc_type none -ksp_atol ${GMRES_PRECISION} -ksp_gmres_restart ${GMRES_RESTART}\
 		${GMRES_MONITOR} ${GMRES_VIEW} -lsa_gmres ${GMRES_NB_NODES} ${RESTART} ${ORTHOG}
 #arnoldi options
 ARNOLDI_PRECISION= 1e-5
-ARNOLDI_NBEIGEN= 20
-ARNOLDI_NB_NODES= 1
-#ARNOLDI_LOAD_INITIAL = -ksp_arnoldi_load
+ARNOLDI_NBEIGEN= 50
+ARNOLDI_NB_NODES= 3
+ARNOLDI_LOAD_INITIAL = -ksp_arnoldi_load
 #ARNOLDI_MONITOR = -eps_monitor
 # ARNOLDI_LOAD_ANY = -ksp_arnoldi_load_any
 ARNOLDI_FLAGS= -eps_type arnoldi -eps_true_residual -eps_largest_imaginary -eps_nev ${ARNOLDI_NBEIGEN} -eps_tol ${ARNOLDI_PRECISION} \
-		${ARNOLDI_MONITOR} -lsa_arnoldi ${ARNOLDI_NB_NODES} -eps_max_it 10 -ksp_arnoldi_cexport ${ARNOLDI_LOAD_ANY} 
+		${ARNOLDI_MONITOR} -lsa_arnoldi ${ARNOLDI_NB_NODES} -eps_max_it 5 -ksp_arnoldi_cexport ${ARNOLDI_LOAD_ANY} 
 #ls options
 LS_POWER = 5
 LS_POLY_APPL = 10

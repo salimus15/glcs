@@ -11,9 +11,14 @@ PetscErrorCode Father(com_lsa * com, Vec * v){
 	end=0;
 	MPI_Status status;
 	int flag;
-	
+
+	int taille = 1;
+	PetscScalar * vecteur_initial;	
+		
 	ierr=VecDuplicate(*v,&vec_tmp);CHKERRQ(ierr);
 	ierr=VecDuplicate(*v,&vec_tmp_receive);CHKERRQ(ierr);
+	vecteur_initial = malloc(taille * sizeof(PetscScalar));
+	
 	
 	while(!end){
 		if(!mpi_lsa_com_type_recv(com,&exit_type)){
@@ -21,7 +26,7 @@ PetscErrorCode Father(com_lsa * com, Vec * v){
 		    end=1;
 		    PetscPrintf(PETSC_COMM_WORLD,"$} Father Sending Exit message\n");
 
-		 		    
+		 	// On purge le buffer d'abord avant d'envoyer le message de fin	    
 		    for(i=0;i<com->out_vec_sended;i++){
 		
 				MPI_Test(&(com->vec_requests[i]),&flag,&status);
@@ -38,11 +43,24 @@ PetscErrorCode Father(com_lsa * com, Vec * v){
 	
 		/* check if there's an incoming message */
 		if(!mpi_lsa_com_vec_recv(com, &vec_tmp_receive)){
-			printf(" =========FATHER   I RECEIVED SOME DATA SO I AM GOING TO CHECK THEM ============\n");
+			
+		//	VecGetSize(vec_tmp_receive, &taille);
 /*			if(!mpi_lsa_com_vec_recv_validate(com, &vec_tmp_receive)){*/
-				printf(" =========   I RECEIVED SOME DATA SO I AM GOING TO SEND THEM TO ARNOLDI ============\n");
-				vec_tmp=vec_tmp_receive;
-				mpi_lsa_com_vec_send(com,&vec_tmp);
+		
+		
+		ierr=VecGetSize(vec_tmp_receive,&taille);CHKERRQ(ierr);
+		PetscPrintf(PETSC_COMM_WORLD,"==== > Father OUR INITIALV IS OF SIZE %d\n", taille);
+  		vecteur_initial = realloc(vecteur_initial,taille);  			
+  		ierr=VecGetArray(vec_tmp_receive, &vecteur_initial);CHKERRQ(ierr);
+/*		for (i = 0; i < taille; i++)*/
+/*			PetscPrintf(PETSC_COMM_WORLD,"==== > father[%d] = %e\n", i, vecteur_initial[i]);*/
+	
+		mpi_lsa_com_array_send(com, &taille, vecteur_initial);
+		ierr= VecRestoreArray(vec_tmp_receive, &vecteur_initial);CHKERRQ(ierr);
+
+
+/*				vec_tmp=vec_tmp_receive;*/
+/*				mpi_lsa_com_vec_send(com,&vec_tmp);*/
 /*			}*/
 		}		
 	}	

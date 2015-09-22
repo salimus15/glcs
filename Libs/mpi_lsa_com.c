@@ -182,7 +182,7 @@ int mpi_lsa_com_vec_send(com_lsa * com, Vec * v){
 *
 ************************************************************************************/
 
-// for the validaig funcion check on the bottom
+// for the validatig funcion check on the bottom
 int mpi_lsa_com_vec_recv(com_lsa * com, Vec * v){
 	int flag,count,i;
 	PetscInt size,tmp_int;
@@ -193,15 +193,16 @@ int mpi_lsa_com_vec_recv(com_lsa * com, Vec * v){
 
 	/* first we check if there's data to receive */
 	MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,com->in_com,&flag,&status);
-	/* did we received something ? */
-	if(!flag){
+	MPI_Get_count(&status,MPIU_INT,&size);
+        /* did we received something ? */
+	if(!flag || size==1){
 		return 1; // didn't received anything
 	}
 
 	/* just verify coerancy of data */
-	MPI_Get_count(&status,MPIU_SCALAR,&count);
+	
 	ierr=VecGetSize(*v,&size);CHKERRQ(ierr);
-
+        MPI_Get_count(&status,MPIU_SCALAR,&count);
 	//   if(count!=(int)size) {
 	// 	printf("ERROR: count %d - size %d\n",count,size);
 	// 	return -1; // ALERT !!! We got a real problem here
@@ -267,7 +268,7 @@ int mpi_lsa_com_array_send(com_lsa * com, int * size, PetscScalar * data){
 		MPI_Isend(com->array_out_sended_buffer,*size,MPIU_SCALAR,i,i,com->out_com,&(com->array_requests[i]));
 		com->out_vec_sended++;
 	}
-	printf(" \n\n there is %d message sended \n\n",*size);
+	printf(" \n\n %d :: there is %d message sended \n\n", com->color_group ,*size);
 	return 0;
 }
 

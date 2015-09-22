@@ -51,14 +51,14 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 
 	ierr=PetscOptionsGetInt(PETSC_NULL,"-ksp_ls_eigen",&eigen_nb,&flag);CHKERRQ(ierr);
 	if(!flag) eigen_nb=EIGEN_ALL;
-/*	ierr=PetscOptionsGetString(PETSC_NULL,"-ksp_arnoldi_load",load_path,PETSC_MAX_PATH_LEN,&data_load);CHKERRQ(ierr);*/
-/*	ierr=PetscOptionsGetString(PETSC_NULL,"-ksp_arnoldi_export",export_path,PETSC_MAX_PATH_LEN,&data_export);CHKERRQ(ierr);*/
+	ierr=PetscOptionsGetString(PETSC_NULL,"-ksp_arnoldi_load",load_path,PETSC_MAX_PATH_LEN,&data_load);CHKERRQ(ierr);
+	ierr=PetscOptionsGetString(PETSC_NULL,"-ksp_arnoldi_export",export_path,PETSC_MAX_PATH_LEN,&data_export);CHKERRQ(ierr);
 
-/*	ierr=PetscOptionsHasName(PETSC_NULL,"-ksp_arnoldi_load_any",&load_any);CHKERRQ(ierr);*/
-/*	ierr=PetscOptionsHasName(PETSC_NULL,"-ksp_arnoldi_cexport",&continuous_export);CHKERRQ(ierr);*/
+	ierr=PetscOptionsHasName(PETSC_NULL,"-ksp_arnoldi_load_any",&load_any);CHKERRQ(ierr);
+	ierr=PetscOptionsHasName(PETSC_NULL,"-ksp_arnoldi_cexport",&continuous_export);CHKERRQ(ierr);
 
-/*	if(load_any) PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi loading default data file\n");*/
-/*	PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi path in= %s out= %s\n",load_path,export_path);*/
+	if(load_any) PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi loading default data file\n");
+	PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi path in= %s out= %s\n",load_path,export_path);
 
 	PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi allocating buffer of %d for invariant subspace\n",eigen_nb*2);
 	vs=malloc(size*sizeof(Vec));
@@ -86,82 +86,44 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 		}
 		/* check if we received some data from GMRES		*/
 /*		if(!mpi_lsa_com_vec_recv(com, &initialv)){*/
-/*				printf(" =========   I RECEIVED SOME DATA FROM GMRES ============\n");*/
+/*				VecGetSize(initialv, &taille);*/
+/*				printf(" =========   I RECEIVED %d DATA FROM GMRES ============\n", taille);*/
 /*		}*/
-		    
+		  
+		  if(!mpi_lsa_com_array_recv(com, &taille, vecteur_initial)){
+			//	VecGetSize(initialv, &taille);
+				printf(" =========   I RECEIVED %d DATA FROM GMRES ============\n", taille);
+		}  
 
 		for(j=0;j<eigen_nb;j++){
 			eigenvalues[j]=(PetscScalar)0.0;
 		}
 
-/*		//FIXME: refactoriser les if suivants + flags file read, c'est très très moche*/
-/*		if(data_load&&load_any){*/
-/*		  load_any=PETSC_FALSE;*/
-/*		  data_load=PETSC_TRUE;*/
-/*		}*/
+		//FIXME: refactoriser les if suivants + flags file read, c'est très très moche
+		if(data_load&&load_any){
+		  load_any=PETSC_FALSE;
+		  data_load=PETSC_TRUE;
+		}
 		  ierr = VecAssemblyBegin(initialv);CHKERRQ(ierr);
   		  ierr = VecAssemblyEnd(initialv);CHKERRQ(ierr);
-/*		ierr = VecView(initialv,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);*/
 	
-/*		ierr=VecGetSize(initialv,&taille);CHKERRQ(ierr);*/
-/*		PetscPrintf(PETSC_COMM_WORLD,"==== > OUR INITIALV IS OF SIZE %d\n", taille);*/
-/*		ierr=VecGetArray(initialv, &vecteur_initial);CHKERRQ(ierr);*/
-/*		for (i = 0; i < taille; i++)*/
-/*			PetscPrintf(PETSC_COMM_WORLD,"==== > initialv[%d] = %e\n", i, vecteur_initial[i]);*/
-/*	*/
-	
-/*		if(!(data_load^=load_any)){*/
+		if(!(data_load^=load_any)){
 		  ierr=EPSSetInitialSpace(eps,1,&initialv);CHKERRQ(ierr);
-/*		} else {*/
-/*				PetscPrintf(PETSC_COMM_WORLD,"==== > I AM LOADING DATA FROM FILE\n");*/
-/*				PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Reading file %s\n",load_path);*/
-/*				ierr=readBinaryVecArray(load_path,(int*)one,&initialv);CHKERRQ(ierr);*/
-/*				data_load=PETSC_FALSE;*/
-/*				load_any=PETSC_FALSE;*/
-/*				ierr=EPSSetInitialSpace(eps,1,&initialv);CHKERRQ(ierr);*/
-/*				PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Has Read file %s\n",load_path);*/
-/*		}*/
-		#ifdef DEBUG
-/*	  	printf("*} Arnoldi  initial vector initiated\n");*/
-/*		ierr=VecGetSize(initialv,&taille);CHKERRQ(ierr);*/
-/*		PetscPrintf(PETSC_COMM_WORLD,"==== > OUR INITIALV IS OF SIZE %d\n", taille);*/
-/*  		vecteur_initial = realloc(vecteur_initial,taille);  			*/
-/*  		ierr=VecGetArray(initialv, &vecteur_initial);CHKERRQ(ierr);*/
-/*		for (i = 0; i < taille; i++)*/
-/*			PetscPrintf(PETSC_COMM_WORLD,"==== > initialv[%d] = %e\n", i, vecteur_initial[i]);*/
-/*		ierr= VecRestoreArray(initialv, &vecteur_initial);CHKERRQ(ierr);*/
-/*		*/
-	
-		 #endif 	
+		} else {
+				PetscPrintf(PETSC_COMM_WORLD,"==== > I AM LOADING DATA FROM FILE\n");
+				PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Reading file %s\n",load_path);
+				ierr=readBinaryVecArray(load_path,(int*)one,&initialv);CHKERRQ(ierr);
+				data_load=PETSC_FALSE;
+				load_any=PETSC_FALSE;
+				ierr=EPSSetInitialSpace(eps,1,&initialv);CHKERRQ(ierr);
+				PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Has Read file %s\n",load_path);
+		}
 
-/*		#ifdef DEBUG*/
-/*		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Launching EPSSolve\n");*/
-/*		#endif*/
-//		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi errest = %e \n",eps->errest );
-	
-/*		ierr = VecView(initialv,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);*/
-		/* compute eigenvalues */
-
-//		 ierr=EPSSetUp(eps);CHKERRQ(ierr);
 		ierr=EPSSolve(eps);CHKERRQ(ierr);
-/*				ierr = VecView(initialv,PETSC_VIEWER_STDOUT_WORLD);CHKERRQ(ierr);*/
-/*		ierr=VecGetSize(initialv,&taille);CHKERRQ(ierr);*/
-/*		PetscPrintf(PETSC_COMM_WORLD,"==== > OUR INITIALV IS OF SIZE %d\n", taille);*/
-/*  		vecteur_initial = realloc(vecteur_initial,taille);  			*/
-/*  		ierr=VecGetArray(initialv, &vecteur_initial);CHKERRQ(ierr);*/
-/*		for (i = 0; i < taille; i++)*/
-/*			PetscPrintf(PETSC_COMM_WORLD,"==== > initialv[%d] = %e\n", i, vecteur_initial[i]);*/
-/*		ierr= VecRestoreArray(initialv, &vecteur_initial);CHKERRQ(ierr);*/
 		
-		
-//		 ierr= EPSVectorsView(eps,viewer);
 				/*construct new initial vector*/
 			ierr=EPSGetInvariantSubspace(eps, vs);CHKERRQ(ierr);
 		++counter;
-//		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Achieved %d Iterations of EPSSolve\n", counter);
-/*		#ifdef DEBUG*/
-/*		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Achieved EPSSolve\n");*/
-/*		#endif*/
 
 		/* get the number of guessed eigenvalues */
 		ierr=EPSGetConverged(eps,&eigen_nb);CHKERRQ(ierr);
@@ -250,7 +212,11 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
   				//	 ierr=VecDuplicate(initialv,&vec_tmp_receive);
   				//PetscPrintf(PETSC_COMM_WORLD, "!!! Arnoldi has not converged so we change the initial vector !!!\n");
   				 /* check if there's an incoming message */
-				 if(!mpi_lsa_com_vec_recv(com, &initialv)){
+
+
+/*				 if(!mpi_lsa_com_vec_recv(com, &initialv)){*/
+					if(!mpi_lsa_com_array_recv(com, &taille, vecteur_initial)){
+
 					printf(" =========   I RECEIVED SOME DATA FROM GMRES ============\n");
 					need_new_init = PETSC_FALSE;
 		     	 }else{
