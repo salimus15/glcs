@@ -2,7 +2,8 @@
 #ifndef MPI_LSA_H_
 #define MPI_LSA_H_
 
-
+#include "unistd.h"
+#include "stdio.h"
 #include "mpi.h"
 #include "args_handler.h"
 #include "petsc.h"
@@ -15,7 +16,7 @@
 
 
 typedef struct _com_lsa{
-	int com_world;	// MPI_COMM_WORLD
+	int com_world;							// MPI_COMM_WORLD
 
 	union {
 		int com[4];
@@ -25,44 +26,48 @@ typedef struct _com_lsa{
 	union {
 		int com[4];
 		int gmres,father,arnoldi,ls;
-	} inter;
+	} inter; 								// intercommucators: it contains the intercomm with the leader of the peer group
 
 	union {
 		int com[4];
 		int gmres,father,arnoldi,ls;
-	} size;	// groups size
+	} size;									// groups size: it indicates the size of each group
 
 	union {
 		int com[4];
 		int gmres,father,arnoldi,ls;
-	} master;
+	} master;								// group-masters: it indicates the rank_world of the master of each group
 
-	int size_world;	// size of MPI_COMM_WORLD
-	int com_group;		// group to which belongs the process
-	int rank_group;	//rank in the group
-	int color_group;	// the colo of the goup to which belongs the pocess
+	int size_world;						// size of MPI_COMM_WORLD
+	int com_group;							// group's communicator
+	int rank_group;						//rank in the group
+	int color_group;						// the color of the goup to which belongs the process
 
-	int rank_world;	// rank in world 
+	int rank_world;						// rank in world 
+	int recv_flag;							// indicates if there a msg to be received by the group( the master get the information and distribut it) 
+												// if true then the master will receive it and the others will wait for a scatter.
 
-	int * in_size;
-	int * out_size;
-
-	int * vec_requests;
-	int * type_requests;
-	int * array_requests;
+	int * in_size;							//
+	int * out_size;						//
+	
+//	requests array for outcomming messaging : their size depends on out_number (see bellow)
+	int * vec_requests;					// this for sendig Petsc Vec
+	int * type_requests;					// this for sending special messages like exit message
+	int * array_requests;				// this for sending arrays
 
 	int vec_requests_nb;
 	int type_requests_nb;
 	int array_requests_nb;
 
-	int * vec_in_disp;
-	int * vec_out_disp;
+	int * vec_in_disp;					// table of displacement inside the incomming vec
+	int * vec_out_disp;					// array of displacement inside the outcomming vec
+	int * vec_color_disp;
 
-	int in_number;
-	int out_number;
+	int in_number;							// size of in_comm: means the number of process in the incomming comm group
+	int out_number;						// size of out_com: means the number of process in the outcomming comm group
 
-	int out_sended;
-	int in_received;
+	int out_sended;						// counter of sended msg
+	int in_received;						// counter of received msg
 
 	PetscScalar * out_sended_buffer;
 	PetscScalar * in_received_buffer;
@@ -71,11 +76,17 @@ typedef struct _com_lsa{
 	PetscScalar * array_out_sended_buffer;
 	PetscScalar * array_in_received_buffer;
 
-	int out_vec_sended;
-	int array_out_sended;
+	int out_vec_sended;					// counter of sended vecs ( including those sent and not received by the remot process)
+	int array_out_sended;				// counter of sended arrays ( including those sent and not received by the remot process)
+	
+	int in_com;								// communicator for incomming messaging
+	int out_com;  							// communicator for outputing messaging
 
-	int in_com;
-	int out_com;
+	int * vec_color_sizes;				//Vector sizes within the group: means the size of the vector for each process in the color_group 
+	int * vec_out_sizes;					//Vector sizes within the out group: means the size of the vector for each process in the out_group
+	int * vec_in_sizes;					//Vector sizes within the in group: means the size of the vector for each process in the in_group
+
+
 
 } com_lsa;
 

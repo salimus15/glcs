@@ -16,7 +16,7 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 	PetscBool flag,data_load,data_export,continuous_export,load_any;
 	int exit_type=0, counter = 0, l;
 	int sos_type = 911;
-	PetscScalar *vecteur_initial;
+	Vec vecteur_initial;
 	PetscViewer viewer;	
 
 
@@ -65,7 +65,10 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 	for(i=0;i<size;i++){
 		ierr=VecDuplicate(*v,&vs[i]);CHKERRQ(ierr);
 	}
-	vecteur_initial = malloc(size * sizeof(PetscScalar));
+	ierr=VecDuplicate(initialv,&vecteur_initial);CHKERRQ(ierr);
+/*	vecteur_initial = malloc(size * sizeof(PetscScalar));*/
+
+	//	setting_out_vec_sizes( com, v);
 
 
 	end=0;
@@ -85,15 +88,17 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 		  }
 		}
 		/* check if we received some data from GMRES		*/
-/*		if(!mpi_lsa_com_vec_recv(com, &initialv)){*/
-/*				VecGetSize(initialv, &taille);*/
-/*				printf(" =========   I RECEIVED %d DATA FROM GMRES ============\n", taille);*/
-/*		}*/
-		  
-		  if(!mpi_lsa_com_array_recv(com, &taille, vecteur_initial)){
-			//	VecGetSize(initialv, &taille);
-				printf(" =========   I RECEIVED %d DATA FROM GMRES ============\n", taille);
-		}  
+		if(!mpi_lsa_com_vec_recv(com, &vecteur_initial)){
+				VecGetSize(initialv, &taille);
+				printf(" =========  %d I RECEIVED %d DATA FROM GMRES ============\n",com->rank_world, taille);
+		}
+/*		  */
+/*		  if(!mpi_lsa_com_array_recv(com, &taille, vecteur_initial)){*/
+/*			//	VecGetSize(initialv, &taille);*/
+/*					printf(" =========  %d I RECEIVED %d DATA FROM GMRES ============\n",com->rank_world, taille);*/
+/*					for (i = 0; i < taille; i++)*/
+/*						PetscPrintf(PETSC_COMM_WORLD,"==== > arnoldi %d [%d] = %e\n",com->rank_world, i, vecteur_initial[i]);*/
+/*		}  */
 
 		for(j=0;j<eigen_nb;j++){
 			eigenvalues[j]=(PetscScalar)0.0;
@@ -214,8 +219,8 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
   				 /* check if there's an incoming message */
 
 
-/*				 if(!mpi_lsa_com_vec_recv(com, &initialv)){*/
-					if(!mpi_lsa_com_array_recv(com, &taille, vecteur_initial)){
+				 if(!mpi_lsa_com_vec_recv(com, &vecteur_initial)){
+/*					if(!mpi_lsa_com_array_recv(com, &taille, vecteur_initial)){*/
 
 					printf(" =========   I RECEIVED SOME DATA FROM GMRES ============\n");
 					need_new_init = PETSC_FALSE;

@@ -16,7 +16,7 @@ PetscErrorCode LSQR(com_lsa * com, int * vector_size){
 	PetscInt ls_eigen_min, ls_eigen; // use default values
 	PetscErrorCode ierr;
  	PetscScalar * result_array,*data_buffer;/*[EIGEN_ALL*3+2]*/
-
+	Vec * v;
 	sprintf(load_path,"./lsqr.bin");
 	sprintf(export_path,"./lsqr.bin");
 
@@ -36,6 +36,8 @@ PetscErrorCode LSQR(com_lsa * com, int * vector_size){
 
 	ierr=PetscOptionsHasName(PETSC_NULL,"-ksp_ls_cexport",&continuous_export);CHKERRQ(ierr);
 
+		
+
 /*	#ifdef DEBUG*/
 /*	    PetscPrintf(PETSC_COMM_WORLD,"@} LSQR args : eigen min %d eigen all %d param k %d\n",ls_eigen_min,ls_eigen,eigen_max);*/
 /*	    PetscPrintf(PETSC_COMM_WORLD,"@} LSQR args : loading data from file : %s\n",load_path);*/
@@ -43,6 +45,18 @@ PetscErrorCode LSQR(com_lsa * com, int * vector_size){
 /* 	#endif*/
 
 	/* allocations */
+	
+/*	ierr=VecCreate(PETSC_COMM_WORLD, v);CHKERRQ(ierr);*/
+/*	ierr=VecSetSizes(*v, PETSC_DECIDE, 10);CHKERRQ(ierr);*/
+/*	ierr=VecSetFromOptions(*v);CHKERRQ(ierr);*/
+/*	ierr=VecSet(*v,(PetscScalar)0.0);CHKERRQ(ierr);*/
+/*	setting_out_vec_sizes( com, v);*/
+
+	
+	
+/*	VecSetFromOptions(Vec v);*/
+
+	
 	ierr=PetscMalloc((*vector_size)*sizeof(PetscScalar),&eigen_tri);
 	ierr=PetscMalloc((*vector_size)*sizeof(PetscScalar),&eigen_cumul);
 	ierr=PetscMalloc(((*vector_size)+1)*sizeof(PetscScalar),&d);
@@ -56,7 +70,7 @@ PetscErrorCode LSQR(com_lsa * com, int * vector_size){
 	ierr=PetscMalloc((eigen_max+1)*sizeof(PetscScalar),&delta);
 	ierr=PetscMalloc((eigen_max*3+2)*sizeof(PetscScalar),&result_array);
 	result_array_size=2+3*eigen_max;
-
+	
 	for(i=0;i<(*vector_size);i++){
 	  eigen_tri[i]=(PetscScalar)0.0;
 	  eigen_cumul[i]=(PetscScalar)0.0;

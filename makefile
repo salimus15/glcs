@@ -40,14 +40,14 @@ DEBUG_KSP_VIEW = -ksp_view
 #gmres options
 GMRES_PRECISION= 1e-15
 GMRES_RESTART= ${RESTART_MAX}
-GMRES_NB_NODES= 3
-#GMRES_MONITOR= -ksp_monitor_true_residual
+GMRES_NB_NODES= 2
+GMRES_MONITOR= -ksp_monitor_true_residual
 GMRES_FLAGS= -ksp_rtol 1e-100 -ksp_divtol 1e1000 -ksp_max_it 7000 -pc_type none -ksp_atol ${GMRES_PRECISION} -ksp_gmres_restart ${GMRES_RESTART}\
 		${GMRES_MONITOR} ${GMRES_VIEW} -lsa_gmres ${GMRES_NB_NODES} ${RESTART} ${ORTHOG}
 #arnoldi options
 ARNOLDI_PRECISION= 1e-5
 ARNOLDI_NBEIGEN= 50
-ARNOLDI_NB_NODES= 3
+ARNOLDI_NB_NODES= 2
 ARNOLDI_LOAD_INITIAL = -ksp_arnoldi_load
 #ARNOLDI_MONITOR = -eps_monitor
 # ARNOLDI_LOAD_ANY = -ksp_arnoldi_load_any
@@ -135,7 +135,7 @@ effacer :
 ##################################################################
 ##################     Execution Rules     #######################
 ##################################################################
-#valgrind --sigill-diagnostics=yes --show-below-main=yes --leak-check=full --show-leak-kinds=all
+#valgrind -v --trace-children=yes --track-origins=yes --sigill-diagnostics=yes --vgdb=full --show-below-main=yes  --read-var-info=yes
 
 #
 runlhr:
@@ -163,9 +163,17 @@ runs:
 
 # No convergence observed
 runx:
-	 ${MPIEXEC}  -np  ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh ${GLSA_FLAGS} \
+	${MPIEXEC} -np  ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh ${GLSA_FLAGS}  \
 	 -mfile ${MDIR}/utm300.mtx_300x300_3155nnz \
 	 2>&1 | tee ./resultats/gmres_vs_glsa/utm300M${RESTART_MAX}_LSA${LS_PC_USE}.txt 
+
+# runx:
+# 	 ${MPIEXEC} -np  ${MPI_NODES} xterm -hold -e gdb -ex run --args ./hyperh  [${GLSA_FLAGS}] [${GLSA_FLAGS}] [${GLSA_FLAGS}] [${GLSA_FLAGS}]  \
+# 	 -mfile ${MDIR}/utm300.mtx_300x300_3155nnz \
+# 	 2>&1 | tee ./resultats/gmres_vs_glsa/utm300M${RESTART_MAX}_LSA${LS_PC_USE}.txt 
+
+
+
 
 # no convergence for gmres alone and divergence using LS
 runa:

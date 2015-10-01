@@ -24,6 +24,8 @@ PetscErrorCode launchGMRES(com_lsa * com, Vec * b, Mat * A){
 	ierr = KSPSetOperators(ksp, *A, *A);CHKERRQ(ierr);
 	ierr = KSPSetFromOptions(ksp);CHKERRQ(ierr);
 
+		//setting_out_vec_sizes( com, b);
+
 	PetscPrintf(com->com_group,"#} GMRES Solving...\n");
 
 //	ierr = KSPSolve(ksp, *b, x); CHKERRQ(ierr);

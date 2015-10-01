@@ -54,12 +54,12 @@ PetscErrorCode MyKSPSolve_FGMRES(KSP ksp,com_lsa * com)
 
   ierr = MyKSPFGMRESCycle(&cycle_its,ksp);CHKERRQ(ierr);
   while (!ksp->reason) {
-  	  if(nbr_prec > 0){
+//   	  if(nbr_prec > 0){
 		 if(!GmresLSAPrecond(com,ksp)){
 		   PetscPrintf(PETSC_COMM_WORLD,"Préconditionnement LSA à %d itérations\n",ksp->its);
 		  	nbr_prec--; 
 		 }
-		}
+// 		}
     ierr = MyKSPFGMRESResidual(ksp);CHKERRQ(ierr);
     if (ksp->its >= ksp->max_it) break;
     ierr = MyKSPFGMRESCycle(&cycle_its,ksp);CHKERRQ(ierr);
@@ -75,16 +75,16 @@ PetscErrorCode MyKSPSolve_FGMRES(KSP ksp,com_lsa * com)
 //		ierr = VecCopy(ksp->vec_sol,vec_tmp);CHKERRQ(ierr);
 // 		ierr = PCGetOperators(ksp->pc,&Amat,&Pmat);CHKERRQ(ierr);
 //		KSPBuildSolution(ksp,vec_tmp,NULL);
-		ierr=KSPBuildResidual(ksp,NULL,NULL,&vec_tmp);CHKERRQ(ierr);
+// 		ierr=KSPBuildResidual(ksp,NULL,NULL,&vec_tmp);CHKERRQ(ierr);
 //		ierr=MatMult(Amat,vec_tmp,vec_t);CHKERRQ(ierr);
 //		ierr=VecAYPX(vec_t,-1.,ksp->vec_rhs);CHKERRQ(ierr);
 		
 		
 		/* Step of Sending  to Arnoldi Under some conditions*/
-		ierr=VecGetSize(vec_tmp,&taille);CHKERRQ(ierr);
-		PetscPrintf(PETSC_COMM_WORLD," GMRES  THERE IS %d DATA TO SEND \n",taille);
+/*		ierr=VecGetSize(vec_tmp,&taille);CHKERRQ(ierr);*/
+/*		PetscPrintf(PETSC_COMM_WORLD," GMRES  THERE IS %d DATA TO SEND \n",taille);*/
 		mpi_lsa_com_vec_send(com,&vec_tmp);
-		   
+		//  mpi_lsa_send_vec(com, &vec_tmp); 
 /*	  }*/
 /*	}*/
   }

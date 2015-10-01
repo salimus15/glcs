@@ -11,14 +11,15 @@ PetscErrorCode Father(com_lsa * com, Vec * v){
 	end=0;
 	MPI_Status status;
 	int flag;
-
+	Vec vecteur_initial;
+        
 	int taille = 1;
-	PetscScalar * vecteur_initial;	
+	
 		
 	ierr=VecDuplicate(*v,&vec_tmp);CHKERRQ(ierr);
 	ierr=VecDuplicate(*v,&vec_tmp_receive);CHKERRQ(ierr);
-	vecteur_initial = malloc(taille * sizeof(PetscScalar));
-	
+	//vecteur_initial = malloc(taille * sizeof(PetscScalar));
+		//setting_out_vec_sizes( com, v);
 	
 	while(!end){
 		if(!mpi_lsa_com_type_recv(com,&exit_type)){
@@ -44,25 +45,33 @@ PetscErrorCode Father(com_lsa * com, Vec * v){
 		/* check if there's an incoming message */
 		if(!mpi_lsa_com_vec_recv(com, &vec_tmp_receive)){
 			
-		//	VecGetSize(vec_tmp_receive, &taille);
 /*			if(!mpi_lsa_com_vec_recv_validate(com, &vec_tmp_receive)){*/
 		
 		
-		ierr=VecGetSize(vec_tmp_receive,&taille);CHKERRQ(ierr);
-		PetscPrintf(PETSC_COMM_WORLD,"==== > Father OUR INITIALV IS OF SIZE %d\n", taille);
-  		vecteur_initial = realloc(vecteur_initial,taille);  			
-  		ierr=VecGetArray(vec_tmp_receive, &vecteur_initial);CHKERRQ(ierr);
+/*		ierr=VecGetSize(vec_tmp_receive,&taille);CHKERRQ(ierr);*/
+/*		PetscPrintf(PETSC_COMM_WORLD,"==== > Father OUR INITIALV IS OF SIZE %d\n", taille);*/
+/*  		vecteur_initial = realloc(vecteur_initial,taille);  			*/
+/*  		ierr=VecGetArray(vec_tmp_receive, &vecteur_initial);CHKERRQ(ierr);*/
 /*		for (i = 0; i < taille; i++)*/
 /*			PetscPrintf(PETSC_COMM_WORLD,"==== > father[%d] = %e\n", i, vecteur_initial[i]);*/
 	
-		mpi_lsa_com_array_send(com, &taille, vecteur_initial);
-		ierr= VecRestoreArray(vec_tmp_receive, &vecteur_initial);CHKERRQ(ierr);
+/*		mpi_lsa_com_array_send(com, &taille, vecteur_initial);*/
+/*		ierr= VecRestoreArray(vec_tmp_receive, &vecteur_initial);CHKERRQ(ierr);*/
 
+					
+// 				vec_tmp=vec_tmp_receive;
+			if(com->in_received == com->in_number){
+				ierr=VecCopy(vec_tmp_receive,vec_tmp);CHKERRQ(ierr);
+				mpi_lsa_com_vec_send(com,&vec_tmp);
+				com->in_number = 0;
+			}
+			
+			
+		}
 
-/*				vec_tmp=vec_tmp_receive;*/
-/*				mpi_lsa_com_vec_send(com,&vec_tmp);*/
-/*			}*/
-		}		
+/*		if(!mpi_lsa_receive_vec(com, &vecteur_initial)){*/
+/*			mpi_lsa_send_vec(com, &vecteur_initial);*/
+/*		}		*/
 	}	
 	return 0;
 }

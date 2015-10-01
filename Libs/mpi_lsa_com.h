@@ -40,14 +40,20 @@ int mpi_lsa_com_type_recv(com_lsa * com, int * type);
 /* send to receivers what will be the type of data that'll be send */
 int mpi_lsa_com_type_send(com_lsa * com, int * type);
 
+int mpi_lsa_send_vec(com_lsa * com, Vec * v);
 
+int mpi_lsa_receive_vec(com_lsa * com, Vec * v);
 
 /* send an array of data of PetscScalar type */
 int mpi_lsa_com_array_send(com_lsa * com, int * size, PetscScalar * data);
 /* receive an array of data of PetscScalar type, data array must be allocated */
 int mpi_lsa_com_array_recv(com_lsa * com, int * size, PetscScalar * data);
 
+int setting_out_vec_sizes( com_lsa * com, Vec * v);
+
 int mpi_lsa_com_free(com_lsa * com);
+
+//PetscErrorCode MyVecGetLocalVector(Vec v,Vec w);
 
 #endif
 

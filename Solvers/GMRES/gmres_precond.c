@@ -45,11 +45,10 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
     #endif
     sleep(timing);
   }
-
-  /* received something ? */
+/* received something ? */
   if(nols==0||mpi_lsa_com_array_recv(com,&size_data,data_tmp)){
     return 1;
-  }
+}
       
   #ifdef DEBUG
   else

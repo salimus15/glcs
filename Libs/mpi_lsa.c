@@ -76,7 +76,7 @@ int mpi_lsa_create_groups(com_lsa * com){
 		}
 		
 	}
-	printf("========> i am rank %d my color goup : %d\n",com->rank_world,com->color_group);
+	printf("========> i am rank %d my color goup : %d    my pid is %d \n",com->rank_world,com->color_group, getpid());
 	MPI_Barrier(MPI_COMM_WORLD);
 
 
@@ -86,7 +86,7 @@ int mpi_lsa_create_groups(com_lsa * com){
 	// the group to wich belongs the process is saved in com->com_group
 	MPI_Comm_split(MPI_COMM_WORLD,com->color_group,com->rank_world,&com->com_group);
 	MPI_Comm_rank(com->com_group,&com->rank_group);
-	MPI_Comm_size(com->com_group,&tmp_int);	// ??????????????????!!!!!!!!!!!!!!!!!!!!!!!!!
+	MPI_Comm_size(com->com_group,&tmp_int);	// possibilité de récuperer la taille du com_group
 	
 	return 0;
 }
@@ -163,7 +163,7 @@ int mpi_lsa_create_intercoms(com_lsa * com){
 	else if(com->color_group==2) printf("ARNOLDI : ");
 	else if(com->color_group==3) printf("LS :      ");
 
-	printf("%d: %d (%d) -> %d (%d) -> %d (%d)   out_num: %d,  out_com: %d\n",com->rank_world,com->master.com[prev],prev_size,com->color_group,size,com->master.com[next],next_size, com->out_number, com->out_com);
+	printf("%d: %d (%d) -> %d (%d) -> %d (%d)   in_com: %d,  out_com: %d\n",com->rank_world,com->master.com[prev],prev_size,com->color_group,size,com->master.com[next],next_size, com->in_com, com->out_com);
 
 	return 0;
 }
