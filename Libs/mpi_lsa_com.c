@@ -59,7 +59,7 @@ int mpi_lsa_com_vecsize_init(com_lsa * com, Vec * v){
 	
 	printf(">>>>> %d my_group= %d, in_number = %d, out_number = %d , group_size = ",com->rank_world, com->color_group, com->in_number, com->out_number, group_size); 
 ////////////////////////////////////////////////////////////////////////
-	com->vec_color_sizes = malloc(sizeof(int) * group_size);
+	//com->vec_color_sizes = malloc(sizeof(int) * group_size);
 ////////////////////////////////////////////////////////////////////////
 	com->out_sended=0;
 	com->in_received=0;
@@ -79,10 +79,10 @@ int mpi_lsa_com_vecsize_init(com_lsa * com, Vec * v){
 	/* now process to the exchange */
 	MPI_Allgather(&local_size,1,MPI_INT,size1,number1,MPI_INT,com1);
 	MPI_Allgather(&local_size,1,MPI_INT,size2,number2,MPI_INT,com2);
-	if(group_size > 1){
-		MPI_Allgather(&local_size, 1, MPIU_INT, com->vec_color_sizes, group_size, MPIU_INT, com->com_group);
+/*	if(group_size > 1){*/
+/*		MPI_Allgather(&local_size, 1, MPIU_INT, com->vec_color_sizes, group_size, MPIU_INT, com->com_group);*/
 /*     printf(" com size = %d :):):):) \n", com->size.com[group_id] );         */
-   }else com->vec_color_sizes[0] = local_size;
+/*   }else com->vec_color_sizes[0] = local_size;*/
         
         
 	// displacements for each in or out node
@@ -99,10 +99,10 @@ int mpi_lsa_com_vecsize_init(com_lsa * com, Vec * v){
 	}
 		printf("\n");
 	com->vec_color_disp[0]=0;
-	for(i=1;i<group_size; i++){
-		com->vec_color_disp[i]=com->vec_color_disp[i-1]+com->vec_color_sizes[i-1];
-		printf(" <<<<<<<<< %d, vec_color_disp[%d] = %d", com->rank_world, i, com->vec_color_disp[i]);
-	}
+/*	for(i=1;i<group_size; i++){*/
+/*		com->vec_color_disp[i]=com->vec_color_disp[i-1]+com->vec_color_sizes[i-1];*/
+/*		printf(" <<<<<<<<< %d, vec_color_disp[%d] = %d", com->rank_world, i, com->vec_color_disp[i]);*/
+/*	}*/
 	printf("\n");
 	
 /*     for(i = 0; i< com->size.com[group_id]; ++i){*/

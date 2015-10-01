@@ -40,7 +40,7 @@ DEBUG_KSP_VIEW = -ksp_view
 #gmres options
 GMRES_PRECISION= 1e-15
 GMRES_RESTART= ${RESTART_MAX}
-GMRES_NB_NODES= 2
+GMRES_NB_NODES= 3
 GMRES_MONITOR= -ksp_monitor_true_residual
 GMRES_FLAGS= -ksp_rtol 1e-100 -ksp_divtol 1e1000 -ksp_max_it 7000 -pc_type none -ksp_atol ${GMRES_PRECISION} -ksp_gmres_restart ${GMRES_RESTART}\
 		${GMRES_MONITOR} ${GMRES_VIEW} -lsa_gmres ${GMRES_NB_NODES} ${RESTART} ${ORTHOG}
@@ -163,7 +163,7 @@ runs:
 
 # No convergence observed
 runx:
-	${MPIEXEC} -np  ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh ${GLSA_FLAGS}  \
+	valgrind -v --trace-children=yes --track-origins=yes --sigill-diagnostics=yes --vgdb=full --show-below-main=yes  --read-var-info=yes ${MPIEXEC} -np  ${MPI_NODES} ${DEBUG_VALGRIND} ./hyperh ${GLSA_FLAGS}  \
 	 -mfile ${MDIR}/utm300.mtx_300x300_3155nnz \
 	 2>&1 | tee ./resultats/gmres_vs_glsa/utm300M${RESTART_MAX}_LSA${LS_PC_USE}.txt 
 
