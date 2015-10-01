@@ -302,25 +302,25 @@ int mpi_lsa_com_array_send(com_lsa * com, int * size, PetscScalar * data){
 int mpi_lsa_com_array_recv(com_lsa * com, int * size, PetscScalar * data){
 	MPI_Status status;
 	int flag;
-	int my_com_size;
 
-/*	printf(" %d : j'entre bien dans mpi_lsa_com_array_recv\n",com->rank_world);*/
 	/* first we check if there's data to receive */
 	MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,com->in_com,&flag,&status);
-	if(!flag)
-		return 1;
-	MPI_Get_count(&status,MPI_INT,size);
-	/* did we received something ? */
-	if(*size==1 || *size==0)
+	if(!flag )
 		return 1; // didn't received anything
 
+	/* did we received something ? */
+	MPI_Get_count(&status,MPI_INT,size);
+	if(*size==1)
+		return 1; // didn't received anything
+
+	printf("mpi_lsa_com_array_recv2\n");
 	/* how large will be the array */
 	MPI_Get_count(&status,MPIU_SCALAR,size);
-//	if(size == 1){ size =0;	return 1;
 	printf("Receive size=%d (%d scalars)\n",*size,*size/8);
+	
 	/* receive the data array */
-//	PetscMalloc(sizeof(PetscScalar)*(PetscInt)size,&data);
 	MPI_Recv(data,*size,MPIU_SCALAR,status.MPI_SOURCE,status.MPI_TAG,com->in_com,&status);
+
 	return 0;
 }
 
