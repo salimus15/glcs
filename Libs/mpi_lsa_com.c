@@ -260,7 +260,7 @@ int mpi_lsa_com_array_send(com_lsa * com, int * size, PetscScalar * data){
 
 	/* check if previous requests where completed */
 	for(i=0;i<com->array_out_sended;i++){
-		MPI_Test(&(com->array_requests[i]),&flag,&status);
+		MPI_Test(&com->array_requests[i],&flag,&status);
 		/* if not cancel it */
 		if(!flag){
 			/* if no vector was sent by any of the group nodes*/
@@ -273,7 +273,7 @@ int mpi_lsa_com_array_send(com_lsa * com, int * size, PetscScalar * data){
 			/* we update the vector to send to the latest version */
 			if(((int)(PetscRealPart(tmp_global)))==vsize){
 				for(i=0;i<com->array_out_sended;i++)
-					MPI_Cancel(&(com->array_requests[i]));
+					MPI_Cancel((MPI_Request*)&(com->array_requests[i]));
 				com->array_out_sended=0;
 			}else{
 				return 1;
@@ -291,10 +291,11 @@ int mpi_lsa_com_array_send(com_lsa * com, int * size, PetscScalar * data){
 	/* for each node in the out domain */
 	for(i=0;i<com->out_number;i++){
 		/* we send a portion of data */
-		MPI_Isend(com->array_out_sended_buffer,*size,MPIU_SCALAR,i,i,com->out_com,&(com->array_requests[i]));
+		printf("Send size=%d (%d scalars)\n",*size,*size/8);
+		MPI_Isend(com->array_out_sended_buffer,*size,MPIU_SCALAR,i,i,com->out_com,&com->array_requests[i]);
 		com->out_vec_sended++;
 	}
-	printf(" \n\n %d :: there is %d message sended \n\n", com->color_group ,*size);
+
 	return 0;
 }
 
