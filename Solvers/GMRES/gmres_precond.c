@@ -15,7 +15,7 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
   PetscInt size_data,ls_power,latency,hang,timing;
   PetscInt nols;
   PetscBool flag;
-  int i,j;
+  int i,j, size;
 
   PetscScalar alpha;
   PetscScalar * eta,*delta,*beta;
@@ -43,13 +43,15 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
     #endif
     sleep(timing);
   }else return 1;
-
+  	size = (PetscInt)data_tmp[0];
+	MPI_Bcast(data_tmp, size, MPIU_SCALAR, 0, com->com_group);  
 	printf("#}%d Going to check if data to receive", com->rank_world);
 
   /* received something ? */
   if(nols==0||mpi_lsa_com_array_recv(com,&size_data,data_tmp)){
     return 1;
   }
+  
 //  #ifdef DEBUG
   else
     printf("#}%d GMRESLSPrecond Received data from LSQR of size %d and alpha = %e\n", com->rank_world,(PetscInt)data_tmp[0],(PetscReal)data_tmp[1] );
