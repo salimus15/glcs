@@ -63,7 +63,7 @@ PetscErrorCode Father(com_lsa * com, Vec * v){
 			if(com->in_received == com->in_number){
 				ierr=VecCopy(vec_tmp_receive,vec_tmp);CHKERRQ(ierr);
 				mpi_lsa_com_vec_send(com,&vec_tmp);
-				com->in_number = 0;
+				com->in_received = 0;
 			}
 			
 			

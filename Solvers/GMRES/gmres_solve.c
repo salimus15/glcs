@@ -71,18 +71,12 @@ PetscErrorCode MyKSPSolve_FGMRES(KSP ksp,com_lsa * com)
      but i have ot the choice for now and it is performed only when Anoldi has 0 converged values So lets do it
 	*/
  		ierr = VecDuplicate(ksp->vec_sol,&vec_tmp);CHKERRQ(ierr);
-// 		ierr = VecDuplicate(ksp->vec_sol,&vec_t);CHKERRQ(ierr);
-//		ierr = VecCopy(ksp->vec_sol,vec_tmp);CHKERRQ(ierr);
-// 		ierr = PCGetOperators(ksp->pc,&Amat,&Pmat);CHKERRQ(ierr);
-//		KSPBuildSolution(ksp,vec_tmp,NULL);
-// 		ierr=KSPBuildResidual(ksp,NULL,NULL,&vec_tmp);CHKERRQ(ierr);
-//		ierr=MatMult(Amat,vec_tmp,vec_t);CHKERRQ(ierr);
-//		ierr=VecAYPX(vec_t,-1.,ksp->vec_rhs);CHKERRQ(ierr);
+
 		
 		
 		/* Step of Sending  to Arnoldi Under some conditions*/
 /*		ierr=VecGetSize(vec_tmp,&taille);CHKERRQ(ierr);*/
-/*		PetscPrintf(PETSC_COMM_WORLD," GMRES  THERE IS %d DATA TO SEND \n",taille);*/
+		PetscPrintf(PETSC_COMM_WORLD," GMRES  THERE IS %d DATA TO SEND \n",taille);
 		mpi_lsa_com_vec_send(com,&vec_tmp);
 		//  mpi_lsa_send_vec(com, &vec_tmp); 
 /*	  }*/
