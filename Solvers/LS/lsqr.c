@@ -253,7 +253,7 @@ PetscErrorCode LSQR(com_lsa * com, int * vector_size){
 			ierr=PetscMemcpy(&result_array[1],&alpha,1*sizeof(PetscScalar));CHKERRQ(ierr);
 			ierr=PetscMemcpy(&result_array[2],eta,ls_eigen*sizeof(PetscScalar));CHKERRQ(ierr);
 			ierr=PetscMemcpy(&result_array[2+ls_eigen],beta,ls_eigen*sizeof(PetscScalar));CHKERRQ(ierr);
-			ierr=PetscMemcpy(&result_array[2+2*ls_eigen],delta,ls_eigen*sizeof(PetscScalar));CHKERRQ(ierr);
+			ierr=PetscMemcpy(&result_array[2+(2*ls_eigen)],delta,ls_eigen*sizeof(PetscScalar));CHKERRQ(ierr);
 
 			if(continuous_export){
 			  ierr=writeBinaryScalarArray(data_export?export_path:"./lsqr.bin", cumul, eigen_tri);

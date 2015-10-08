@@ -304,23 +304,22 @@ int mpi_lsa_com_array_recv(com_lsa * com, int * size, PetscScalar * data){
 	MPI_Status status;
 	int flag;
 
+
 	/* first we check if there's data to receive */
 	MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,com->in_com,&flag,&status);
-	if(!flag )
-		return 1; // didn't received anything
 
-	/* did we received something ? */
 	MPI_Get_count(&status,MPI_INT,size);
-	if(*size==1)
+	/* did we received something ? */
+	if(!flag || *size==1)
 		return 1; // didn't received anything
 
-	printf("mpi_lsa_com_array_recv2\n");
 	/* how large will be the array */
 	MPI_Get_count(&status,MPIU_SCALAR,size);
 	printf("Receive size=%d (%d scalars)\n",*size,*size/8);
-	
 	/* receive the data array */
 	MPI_Recv(data,*size,MPIU_SCALAR,status.MPI_SOURCE,status.MPI_TAG,com->in_com,&status);
+
+
 
 	return 0;
 }
@@ -539,7 +538,7 @@ int mpi_lsa_com_type_recv(com_lsa * com, int * type){
 	
 	if(!flag )
 		return 1; // didn't received anything
-	
+		MPI_Get_count(&status,MPI_INT,&size);
 
 	if(size!=1)
 		return 1;
@@ -555,13 +554,13 @@ int mpi_lsa_com_type_send(com_lsa * com, int * type){
 
     //FIXME : Ceci part d'une bonne idée mais fait plus de mal que de bien Donc à revoir
      
-	/* check if previous requests where completed */
-/*	for(i=0;i<com->out_sended;i++){*/
-/*		MPI_Test(&(com->type_requests[i]),&flag,&status);*/
-/*		/* if not cancel it */
-/*		if(!flag)*/
-/*			MPI_Cancel(&(com->type_requests[i]));*/
-/*	}*/
+/*	 check if previous requests where completed */
+	for(i=0;i<com->out_sended;i++){
+		MPI_Test(&(com->type_requests[i]),&flag,&status);
+		/* if not cancel it */
+		if(!flag)
+			MPI_Cancel(&(com->type_requests[i]));
+	}
 
 	/* for each node in the out domain */
 	for(i=0;i<com->out_number;i++){
