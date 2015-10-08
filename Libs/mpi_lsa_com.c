@@ -258,7 +258,6 @@ int mpi_lsa_com_array_send(com_lsa * com, int * size, PetscScalar * data){
 	int flag,i,vsize;
 	PetscScalar tmp_global,tmp_local;
 
-	
 	/* check if previous requests where completed */
 	for(i=0;i<com->array_out_sended;i++){
 		MPI_Test(&com->array_requests[i],&flag,&status);
@@ -288,19 +287,15 @@ int mpi_lsa_com_array_send(com_lsa * com, int * size, PetscScalar * data){
 	for(i=0;i<*size;i++){
 		com->array_out_sended_buffer[i]=(PetscScalar)data[i];
 	}
-	i = 0;
-	if(com->color_group == LS_GR){
-			MPI_Isend(com->array_out_sended_buffer,*size,MPIU_SCALAR,i,i,com->out_com,&com->array_requests[i]);
+
+	/* for each node in the out domain */
+	for(i=0;i<com->out_number;i++){
+		/* we send a portion of data */
+		printf("Send size=%d (%d scalars)\n",*size,*size/8);
+		MPI_Isend(com->array_out_sended_buffer,*size,MPIU_SCALAR,i,i,com->out_com,&com->array_requests[i]);
 		com->out_vec_sended++;
-	}else{
-		/* for each node in the out domain */
-		for(i=0;i<com->out_number;i++){
-			/* we send a portion of data */
-			printf("Send size=%d (%d scalars)\n",*size,*size/8);
-			MPI_Isend(com->array_out_sended_buffer,*size,MPIU_SCALAR,i,i,com->out_com,&com->array_requests[i]);
-			com->out_vec_sended++;
-		}
 	}
+
 	return 0;
 }
 
@@ -312,27 +307,20 @@ int mpi_lsa_com_array_recv(com_lsa * com, int * size, PetscScalar * data){
 
 	/* first we check if there's data to receive */
 	MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,com->in_com,&flag,&status);
-	if(!flag )
-		return 1;
+
 	MPI_Get_count(&status,MPI_INT,size);
 	/* did we received something ? */
-	if(*size==1)
+	if(!flag || *size==1)
 		return 1; // didn't received anything
 
 	/* how large will be the array */
 	MPI_Get_count(&status,MPIU_SCALAR,size);
 	printf("Receive size=%d (%d scalars)\n",*size,*size/8);
-	if(com->color_group == GMRES_GR){
-		if( com->rank_world == 0){
-			/* receive the data array */
-			MPI_Recv(data,*size,MPIU_SCALAR,status.MPI_SOURCE,status.MPI_TAG,com->in_com,&status);
-		}
-		MPI_Bcast(size, 1,MPI_INT, 0, com->com_group);
-		MPI_Bcast(data,*size,MPIU_SCALAR, 0, com->com_group);
-	}else{
-		/* receive the data array */
-		MPI_Recv(data,*size,MPIU_SCALAR,status.MPI_SOURCE,status.MPI_TAG,com->in_com,&status);
-	}
+	/* receive the data array */
+	MPI_Recv(data,*size,MPIU_SCALAR,status.MPI_SOURCE,status.MPI_TAG,com->in_com,&status);
+
+
+
 	return 0;
 }
 

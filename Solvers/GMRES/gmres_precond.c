@@ -11,7 +11,7 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
   Mat            Amat,Pmat;
   PetscErrorCode ierr;
   Vec r0_tmp,w0_tmp,w1_tmp,x_tmp,w_1_tmp,r1_tmp,sol_tmp,vec_tmp;
-  PetscScalar * data_tmp;
+  PetscScalar data_tmp[EIGEN_ALL*2*3];
   PetscInt size_data,ls_power,latency,hang,timing;
   PetscInt nols;
   PetscBool flag;
@@ -31,29 +31,29 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
   ierr=PetscOptionsGetInt(PETSC_NULL,"-ksp_ls_m_hang",&hang,&flag);CHKERRQ(ierr);
   if(!flag) hang=ksp->max_it;
   ierr=PetscOptionsGetInt(PETSC_NULL,"-ksp_ls_nols",&nols,&flag);CHKERRQ(ierr);
-  if(!flag) {nols=1;}else{nols=0;}
+  if(!flag) nols=1;
   ierr=PetscOptionsGetInt(PETSC_NULL,"-ksp_ls_timing",&timing,&flag);CHKERRQ(ierr);
   if(!flag) timing=60;
 
-
-PetscMalloc(sizeof(PetscScalar)*EIGEN_ALL*2*3,&data_tmp);
   latency_count++;
 
-  if(((latency_count%latency==0  && ksp->its>0) || ksp->its==2) && nols){
+  if((latency_count%latency==0  && ksp->its>0) || ksp->its==2){
     #ifdef DEBUG
-    PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond at %d its must wait %d seconds (soit %d minutes et %d secondes) before using LSQR\n",ksp->its,timing,timing/60,timing%60);
+    printf("#} %d GMRESLSPrecond at %d its must wait %d seconds (soit %d minutes et %d secondes) before using LSQR\n",com->rank_world, ksp->its,timing,timing/60,timing%60);
     #endif
     sleep(timing);
   }
-/* received something ? */
+
+
+
+  /* received something ? */
   if(nols==0||mpi_lsa_com_array_recv(com,&size_data,data_tmp)){
     return 1;
-}
-      
-  #ifdef DEBUG
+  }
+//  #ifdef DEBUG
   else
-    PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond Received data from LSQR of size %d\n",(PetscInt)data_tmp[0]);
-  #endif
+    printf("#}%d GMRESLSPrecond Received data from LSQR of size %d\n", com->rank_world,(PetscInt)data_tmp[0]);
+ // #endif
 
 
   /* is data consistent ? */
@@ -149,8 +149,6 @@ PetscMalloc(sizeof(PetscScalar)*EIGEN_ALL*2*3,&data_tmp);
     for(i=0;i<(PetscInt)data_tmp[0]-1;i++){
       /* w1=-alpha*w0 - delta[i]*w_1 ((  y = alpha x + delta y. )) (Vec y,PetscScalar alpha,PetscScalar beta,Vec x)*/
       ierr=VecCopy(w_1_tmp,w1_tmp);CHKERRQ(ierr);
-     printf("#} %d alpha [%d](%e %e)\n", com->rank_world,i,PetscRealPart(-alpha),PetscRealPart(-delta[i]));
-      //printf("im process %d and for me alpha = %e +i%e \n",com->rank_world, PetscRealPart(alpha), 
       ierr=VecAXPBY(w1_tmp,-alpha,-(PetscScalar)delta[i],w0_tmp);CHKERRQ(ierr);
       #ifdef DEBUGDATA
       VecNorm(w1_tmp,NORM_2,&norm);
@@ -184,8 +182,6 @@ PetscMalloc(sizeof(PetscScalar)*EIGEN_ALL*2*3,&data_tmp);
 #endif
     }
 
-
-	ierr=VecCopy(x_tmp, w1_tmp);CHKERRQ(ierr);
     /* x1= x1+x*/
     ierr=VecAXPY(sol_tmp,1.0,x_tmp);CHKERRQ(ierr);
 
@@ -208,7 +204,6 @@ PetscMalloc(sizeof(PetscScalar)*EIGEN_ALL*2*3,&data_tmp);
     if(norm>epsilon()){
       PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond norm %e is over epsilon %e\n",norm,epsilon());
 // FIXME:       PetscFunctionReturn(2);
-//return 1;
     }
 
   }
@@ -227,7 +222,7 @@ PetscMalloc(sizeof(PetscScalar)*EIGEN_ALL*2*3,&data_tmp);
   #endif
 
   if(nols!=0) ierr=VecCopy(sol_tmp,ksp->vec_sol);CHKERRQ(ierr);
-/*    if(nols!=0) ierr=VecCopy(vec_tmp,ksp->vec_sol);CHKERRQ(ierr);*/
+
   ierr=PetscFree(eta);CHKERRQ(ierr);
   ierr=PetscFree(beta);CHKERRQ(ierr);
   ierr=PetscFree(delta);CHKERRQ(ierr);
