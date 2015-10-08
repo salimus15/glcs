@@ -42,7 +42,7 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
     printf("#} %d GMRESLSPrecond at %d its must wait %d seconds (soit %d minutes et %d secondes) before using LSQR\n",com->rank_world, ksp->its,timing,timing/60,timing%60);
     #endif
     sleep(timing);
-  }
+  }else return 1;
 
 
 
@@ -52,7 +52,7 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
   }
 //  #ifdef DEBUG
   else
-    printf("#}%d GMRESLSPrecond Received data from LSQR of size %d\n", com->rank_world,(PetscInt)data_tmp[0]);
+    printf("#}%d GMRESLSPrecond Received data from LSQR of size %d and alpha = %e\n", com->rank_world,(PetscInt)data_tmp[0],(PetscReal)data_tmp[1] );
  // #endif
 
 

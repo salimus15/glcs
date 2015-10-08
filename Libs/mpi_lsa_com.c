@@ -257,7 +257,7 @@ int mpi_lsa_com_array_send(com_lsa * com, int * size, PetscScalar * data){
 	MPI_Status status;
 	int flag,i,vsize;
 	PetscScalar tmp_global,tmp_local;
-
+	
 	/* check if previous requests where completed */
 	for(i=0;i<com->array_out_sended;i++){
 		MPI_Test(&com->array_requests[i],&flag,&status);
@@ -307,7 +307,6 @@ int mpi_lsa_com_array_recv(com_lsa * com, int * size, PetscScalar * data){
 
 	/* first we check if there's data to receive */
 	MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,com->in_com,&flag,&status);
-
 	MPI_Get_count(&status,MPI_INT,size);
 	/* did we received something ? */
 	if(!flag || *size==1)
