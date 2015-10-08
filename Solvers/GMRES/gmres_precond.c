@@ -11,7 +11,7 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
   Mat            Amat,Pmat;
   PetscErrorCode ierr;
   Vec r0_tmp,w0_tmp,w1_tmp,x_tmp,w_1_tmp,r1_tmp,sol_tmp,vec_tmp;
-  PetscScalar data_tmp[EIGEN_ALL*2*3];
+  PetscScalar * data_tmp;
   PetscInt size_data,ls_power,latency,hang,timing;
   PetscInt nols;
   PetscBool flag;
@@ -35,8 +35,8 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
   ierr=PetscOptionsGetInt(PETSC_NULL,"-ksp_ls_timing",&timing,&flag);CHKERRQ(ierr);
   if(!flag) timing=60;
 
-	
 
+PetscMalloc(sizeof(PetscScalar)*EIGEN_ALL*2*3,&data_tmp);
   latency_count++;
 
   if(((latency_count%latency==0  && ksp->its>0) || ksp->its==2) && nols){
@@ -149,7 +149,7 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
     for(i=0;i<(PetscInt)data_tmp[0]-1;i++){
       /* w1=-alpha*w0 - delta[i]*w_1 ((  y = alpha x + delta y. )) (Vec y,PetscScalar alpha,PetscScalar beta,Vec x)*/
       ierr=VecCopy(w_1_tmp,w1_tmp);CHKERRQ(ierr);
-     printf("#} %d GMRESLSPrecond Temp [%d][%d] w1_tmp 1 norm %e (%e %e)\n", com->rank_world,j,i,norm,PetscRealPart(-alpha),PetscRealPart(-delta[i]));
+     printf("#} %d alpha [%d](%e %e)\n", com->rank_world,i,PetscRealPart(-alpha),PetscRealPart(-delta[i]));
       //printf("im process %d and for me alpha = %e +i%e \n",com->rank_world, PetscRealPart(alpha), 
       ierr=VecAXPBY(w1_tmp,-alpha,-(PetscScalar)delta[i],w0_tmp);CHKERRQ(ierr);
       #ifdef DEBUGDATA
