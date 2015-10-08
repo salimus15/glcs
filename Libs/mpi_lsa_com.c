@@ -287,15 +287,15 @@ int mpi_lsa_com_array_send(com_lsa * com, int * size, PetscScalar * data){
 	for(i=0;i<*size;i++){
 		com->array_out_sended_buffer[i]=(PetscScalar)data[i];
 	}
-
+	com->nbr_array_sended +=1;
 	/* for each node in the out domain */
 	for(i=0;i<com->out_number;i++){
 		/* we send a portion of data */
 		printf("Send size=%d (%d scalars)\n",*size,*size/8);
-		MPI_Isend(com->array_out_sended_buffer,*size,MPIU_SCALAR,i,i,com->out_com,&com->array_requests[i]);
+		MPI_Isend(com->array_out_sended_buffer,*size,MPIU_SCALAR,i,com->nbr_array_sended + i,com->out_com,&com->array_requests[i]);
 		com->out_vec_sended++;
 	}
-
+	
 	return 0;
 }
 
@@ -303,7 +303,7 @@ int mpi_lsa_com_array_send(com_lsa * com, int * size, PetscScalar * data){
 int mpi_lsa_com_array_recv(com_lsa * com, int * size, PetscScalar * data){
 	MPI_Status status;
 	int flag;
-
+	
 
 	/* first we check if there's data to receive */
 	MPI_Iprobe(MPI_ANY_SOURCE,MPI_ANY_TAG,com->in_com,&flag,&status);
@@ -314,7 +314,7 @@ int mpi_lsa_com_array_recv(com_lsa * com, int * size, PetscScalar * data){
 
 	/* how large will be the array */
 	MPI_Get_count(&status,MPIU_SCALAR,size);
-	printf("Receive size=%d (%d scalars)\n",*size,*size/8);
+	printf("%d Receive size=%d (%d scalars) msg Number =\n", com->rank_world,*size,*size/8, status.MPI_TAG-com->rank_group);
 	/* receive the data array */
 	MPI_Recv(data,*size,MPIU_SCALAR,status.MPI_SOURCE,status.MPI_TAG,com->in_com,&status);
 

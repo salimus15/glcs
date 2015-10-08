@@ -72,7 +72,7 @@ typedef struct _com_lsa{
 	PetscScalar * out_sended_buffer;
 	PetscScalar * in_received_buffer;
 
-
+	int nbr_array_sended;
 	PetscScalar * array_out_sended_buffer;
 	PetscScalar * array_in_received_buffer;
 

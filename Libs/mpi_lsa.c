@@ -32,7 +32,7 @@ int mpi_lsa_init(int argc, char ** argv, com_lsa * com){
 	com->size.com[1]=lsa_father;
 	com->size.com[2]=lsa_arnoldi;	//ici lsa_arnoldi est non-initialisé
 	com->size.com[3]=lsa_ls;
-
+	com->nbr_array_sended = 0;
 	if(com->rank_world==0)printf("]> Creating Groups\n");
 	/* now we need to generate the mpi communicators for each group */
 	mpi_lsa_create_groups(com);
@@ -164,6 +164,7 @@ int mpi_lsa_create_intercoms(com_lsa * com){
 	else if(com->color_group==3) printf("LS :      ");
 
 	printf("%d: %d (%d) -> %d (%d) -> %d (%d)   in_com: %d,  out_com: %d\n",com->rank_world,com->master.com[prev],prev_size,com->color_group,size,com->master.com[next],next_size, com->in_com, com->out_com);
+	
 
 	return 0;
 }
