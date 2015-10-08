@@ -53,10 +53,11 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
   
 //  #ifdef DEBUG
   else
+  size = (PetscInt)data_tmp[0];
+	MPI_Bcast(data_tmp, size, MPIU_SCALAR, 0, com->com_group);
     printf("#}%d GMRESLSPrecond Received data from LSQR of size %d and alpha = %e\n", com->rank_world,(PetscInt)data_tmp[0],(PetscReal)data_tmp[1] );
  // #endif
-	size = (PetscInt)data_tmp[0];
-	MPI_Bcast(data_tmp, size, MPIU_SCALAR, 0, com->com_group);  
+	  
 
   /* is data consistent ? */
   if((((PetscInt)data_tmp[0])*3+2)!=size_data){
