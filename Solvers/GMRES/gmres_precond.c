@@ -44,7 +44,7 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
     sleep(timing);
   }else return 1;
 
-
+	printf("#}%d Going to check if data to receive", com->rank_world);
 
   /* received something ? */
   if(nols==0||mpi_lsa_com_array_recv(com,&size_data,data_tmp)){
