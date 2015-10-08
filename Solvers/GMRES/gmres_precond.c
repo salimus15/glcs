@@ -149,7 +149,7 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
     for(i=0;i<(PetscInt)data_tmp[0]-1;i++){
       /* w1=-alpha*w0 - delta[i]*w_1 ((  y = alpha x + delta y. )) (Vec y,PetscScalar alpha,PetscScalar beta,Vec x)*/
       ierr=VecCopy(w_1_tmp,w1_tmp);CHKERRQ(ierr);
-     printf("#} GMRESLSPrecond Temp [%d][%d] w1_tmp 1 norm %e (%e %e)\n",j,i,norm,PetscRealPart(-alpha),PetscRealPart(-delta[i]));
+     printf("#} %d GMRESLSPrecond Temp [%d][%d] w1_tmp 1 norm %e (%e %e)\n", com->rank_world,j,i,norm,PetscRealPart(-alpha),PetscRealPart(-delta[i]));
       //printf("im process %d and for me alpha = %e +i%e \n",com->rank_world, PetscRealPart(alpha), 
       ierr=VecAXPBY(w1_tmp,-alpha,-(PetscScalar)delta[i],w0_tmp);CHKERRQ(ierr);
       #ifdef DEBUGDATA
