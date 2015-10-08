@@ -26,17 +26,11 @@ PetscErrorCode MyKSPSolve_FGMRES(KSP ksp,com_lsa * com)
   PetscErrorCode ierr;
   PetscInt       cycle_its = 0; /* iterations done in a call to KSPFGMRESCycle */
   KSP_FGMRES     *fgmres   = (KSP_FGMRES*)ksp->data;
-  PetscBool      diagonalscale, flag;
-  Vec 		  vec_tmp, vec_t;
-  int 		  type = -1, taille =0;
-  Mat 		  Amat,Pmat;
-  PetscInt nbr_prec =0;
-  
+  PetscBool      diagonalscale;
+  Vec vec_tmp;
+
   PetscFunctionBegin;
-	
-	ierr=PetscOptionsGetInt(PETSC_NULL,"-ksp_ls_k_param",&nbr_prec,&flag);CHKERRQ(ierr);
-	
-	ierr = PCGetDiagonalScale(ksp->pc,&diagonalscale);CHKERRQ(ierr);
+  ierr = PCGetDiagonalScale(ksp->pc,&diagonalscale);CHKERRQ(ierr);
   if (diagonalscale) SETERRQ1(PetscObjectComm((PetscObject)ksp),PETSC_ERR_SUP,"Krylov method %s does not support diagonal scaling",((PetscObject)ksp)->type_name);
 
   ierr     = PetscObjectSAWsTakeAccess((PetscObject)ksp);CHKERRQ(ierr);
@@ -54,33 +48,13 @@ PetscErrorCode MyKSPSolve_FGMRES(KSP ksp,com_lsa * com)
 
   ierr = MyKSPFGMRESCycle(&cycle_its,ksp);CHKERRQ(ierr);
   while (!ksp->reason) {
-//   	  if(nbr_prec > 0){
-		 if(!GmresLSAPrecond(com,ksp)){
-		   PetscPrintf(PETSC_COMM_WORLD,"Préconditionnement LSA à %d itérations\n",ksp->its);
-		  	nbr_prec--; 
-		 }
-// 		}
+    if(!GmresLSAPrecond(com,ksp))
+      PetscPrintf(PETSC_COMM_WORLD,"Préconditionnement LSA à %d itérations\n",ksp->its);
     ierr = MyKSPFGMRESResidual(ksp);CHKERRQ(ierr);
     if (ksp->its >= ksp->max_it) break;
     ierr = MyKSPFGMRESCycle(&cycle_its,ksp);CHKERRQ(ierr);
-    
-/*    if(!mpi_lsa_com_type_recv(com,&type)){*/
-/*	  if(type==911){*/
-		//   PetscPrintf(PETSC_COMM_WORLD,"$} GMRES received SOS message !!!!!!!!!!!'\n");
-     /*  this is some deprecated especialy for GMRES due to the fact it is expensive and generates a copy the solution vector 
-     but i have ot the choice for now and it is performed only when Anoldi has 0 converged values So lets do it
-	*/
- 		ierr = VecDuplicate(ksp->vec_sol,&vec_tmp);CHKERRQ(ierr);
-
-		
-		ierr=VecGetSize(vec_tmp, &taille);
-		/* Step of Sending  to Arnoldi Under some conditions*/
-/*		ierr=VecGetSize(vec_tmp,&taille);CHKERRQ(ierr);*/
-		PetscPrintf(PETSC_COMM_WORLD," GMRES  THERE IS %d DATA TO SEND \n",taille);
-		mpi_lsa_com_vec_send(com,&vec_tmp);
-		//  mpi_lsa_send_vec(com, &vec_tmp); 
-/*	  }*/
-/*	}*/
+    ierr = VecDuplicate(ksp->vec_rhs,&vec_tmp);CHKERRQ(ierr);
+    mpi_lsa_com_vec_send(com,&vec_tmp);
   }
   /* mark lack of convergence */
   if (ksp->its >= ksp->max_it && !ksp->reason) ksp->reason = KSP_DIVERGED_ITS;
