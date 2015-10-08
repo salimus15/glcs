@@ -91,6 +91,7 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 		if(!mpi_lsa_com_vec_recv(com, &vecteur_initial)){
 				VecGetSize(initialv, &taille);
 				printf(" =========  %d I RECEIVED %d DATA FROM GMRES ============\n",com->rank_world, taille);
+				ierr = VecCopy(vecteur_initial, initialv);
 		}
 /*		  */
 /*		  if(!mpi_lsa_com_array_recv(com, &taille, vecteur_initial)){*/
@@ -99,7 +100,7 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 /*					for (i = 0; i < taille; i++)*/
 /*						PetscPrintf(PETSC_COMM_WORLD,"==== > arnoldi %d [%d] = %e\n",com->rank_world, i, vecteur_initial[i]);*/
 /*		}  */
-
+		
 		for(j=0;j<eigen_nb;j++){
 			eigenvalues[j]=(PetscScalar)0.0;
 		}
@@ -223,6 +224,7 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 /*					if(!mpi_lsa_com_array_recv(com, &taille, vecteur_initial)){*/
 
 					printf(" =========   I RECEIVED SOME DATA FROM GMRES ============\n");
+					ierr = VecCopy(vecteur_initial, initialv);
 					need_new_init = PETSC_FALSE;
 		     	 }else{
 		     			if(!mpi_lsa_com_type_recv(com,&exit_type)){
