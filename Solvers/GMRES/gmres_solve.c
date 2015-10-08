@@ -73,7 +73,7 @@ PetscErrorCode MyKSPSolve_FGMRES(KSP ksp,com_lsa * com)
  		ierr = VecDuplicate(ksp->vec_sol,&vec_tmp);CHKERRQ(ierr);
 
 		
-		
+		ierr=VecGetSize(vec_tmp, &taille);
 		/* Step of Sending  to Arnoldi Under some conditions*/
 /*		ierr=VecGetSize(vec_tmp,&taille);CHKERRQ(ierr);*/
 		PetscPrintf(PETSC_COMM_WORLD," GMRES  THERE IS %d DATA TO SEND \n",taille);
