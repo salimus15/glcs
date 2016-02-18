@@ -90,7 +90,7 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 		/* check if we received some data from GMRES		*/
 		if(!mpi_lsa_com_vec_recv(com, &initialv)){
 				VecGetSize(initialv, &taille);
-				printf(" =========  %d I RECEIVED %d DATA FROM GMRES ============\n",com->rank_world, taille);
+/*				printf(" =========  %d I RECEIVED %d DATA FROM GMRES ============\n",com->rank_world, taille);*/
 /*				ierr = VecCopy(vecteur_initial, initialv);*/
 		}
 /*		  */
@@ -116,13 +116,13 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 		if(!(data_load^=load_any)){
 		  ierr=EPSSetInitialSpace(eps,1,&initialv);CHKERRQ(ierr);
 		} else {
-				PetscPrintf(PETSC_COMM_WORLD,"==== > I AM LOADING DATA FROM FILE\n");
-				PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Reading file %s\n",load_path);
+/*				PetscPrintf(PETSC_COMM_WORLD,"==== > I AM LOADING DATA FROM FILE\n");*/
+/*				PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Reading file %s\n",load_path);*/
 				ierr=readBinaryVecArray(load_path,(int*)one,&initialv);CHKERRQ(ierr);
 				data_load=PETSC_FALSE;
 				load_any=PETSC_FALSE;
 				ierr=EPSSetInitialSpace(eps,1,&initialv);CHKERRQ(ierr);
-				PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Has Read file %s\n",load_path);
+/*				PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Has Read file %s\n",load_path);*/
 		}
 
 		ierr=EPSSolve(eps);CHKERRQ(ierr);
@@ -134,9 +134,9 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 		/* get the number of guessed eigenvalues */
 		ierr=EPSGetConverged(eps,&eigen_nb);CHKERRQ(ierr);
 
- 		#ifdef DEBUG
-		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi %d converged eigenvalues\n",eigen_nb);
- 		#endif
+/* 		#ifdef DEBUG*/
+/*		PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi %d converged eigenvalues\n",eigen_nb);*/
+/* 		#endif*/
 
 		/* send them */
 		for(j=0;j<eigen_nb;j++){
@@ -223,14 +223,14 @@ PetscErrorCode Arnoldi(com_lsa * com, Mat * A, Vec  *v){
 				 if(!mpi_lsa_com_vec_recv(com, &initialv)){
 /*					if(!mpi_lsa_com_array_recv(com, &taille, vecteur_initial)){*/
 
-					printf(" =========   I RECEIVED SOME DATA FROM GMRES ============\n");
+/*					printf(" =========   I RECEIVED SOME DATA FROM GMRES ============\n");*/
 /*					ierr = VecCopy(vecteur_initial, initialv);*/
 					need_new_init = PETSC_FALSE;
 		     	 }else{
 		     			if(!mpi_lsa_com_type_recv(com,&exit_type)){
 			      			if(exit_type==666){
 				    			end=1;
-				    			PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Sending Exit message\n");
+/*				    			PetscPrintf(PETSC_COMM_WORLD,"*} Arnoldi Sending Exit message\n");*/
 
 				    			mpi_lsa_com_type_send(com,&exit_type);
 				    			need_new_init = PETSC_FALSE;

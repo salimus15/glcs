@@ -38,13 +38,13 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
   latency_count++;
 
   if((latency_count%latency==0  && ksp->its>0) || ksp->its==2){
-    #ifdef DEBUG
-    printf("#} %d GMRESLSPrecond at %d its must wait %d seconds (soit %d minutes et %d secondes) before using LSQR\n",com->rank_world, ksp->its,timing,timing/60,timing%60);
-    #endif
+/*    #ifdef DEBUG*/
+/*    printf("#} %d GMRESLSPrecond at %d its must wait %d seconds (soit %d minutes et %d secondes) before using LSQR\n",com->rank_world, ksp->its,timing,timing/60,timing%60);*/
+/*    #endif*/
     sleep(timing);
   }else return 1;
   
-	printf("#}%d Going to check if data to receive", com->rank_world);
+/*	printf("#}%d Going to check if data to receive", com->rank_world);*/
 
   /* received something ? */
   if(nols==0||mpi_lsa_com_array_recv(com,&size_data,data_tmp)){
@@ -56,7 +56,7 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
   size = (PetscInt)data_tmp[0];
   	MPI_Barrier(com->com_group);
 	MPI_Bcast(data_tmp, size, MPIU_SCALAR, 0, com->com_group);
-    printf("#}%d GMRESLSPrecond Received data from LSQR of size %d and alpha = %e\n", com->rank_world,(PetscInt)data_tmp[0],(PetscReal)data_tmp[1] );
+/*    printf("#}%d GMRESLSPrecond Received data from LSQR of size %d and alpha = %e\n", com->rank_world,(PetscInt)data_tmp[0],(PetscReal)data_tmp[1] );*/
  // #endif
 	  
 
@@ -65,8 +65,8 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
     PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond data is not consistent : size mpi %d size data*3+2 %d %e data\n",
 		size_data,(((PetscInt)data_tmp[0])*3+2),((PetscReal)data_tmp[0]));
 
-    for(i=0;i<size_data;i++)
-	PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond data[%d]=%e\n",i,(PetscReal)data_tmp[i]);
+/*    for(i=0;i<size_data;i++)*/
+/*	PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond data[%d]=%e\n",i,(PetscReal)data_tmp[i]);*/
 
      return 1;
   }
@@ -105,24 +105,24 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
   ierr=VecCopy(ksp->vec_sol,sol_tmp);CHKERRQ(ierr);
   /* proceed to computation*/
 
-    #ifdef DEBUG
-    VecNorm(sol_tmp,NORM_2,&norm);
-    PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond Sol norm %e\n",norm);
-    #endif
-    #ifdef DEBUGDATA
-    PetscViewerSetFormat(PETSC_VIEWER_STDOUT_WORLD,PETSC_VIEWER_ASCII_MATLAB );
-    VecView(sol_tmp,PETSC_VIEWER_STDOUT_WORLD);
-    #endif
+/*    #ifdef DEBUG*/
+/*    VecNorm(sol_tmp,NORM_2,&norm);*/
+/*    PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond Sol norm %e\n",norm);*/
+/*    #endif*/
+/*    #ifdef DEBUGDATA*/
+/*    PetscViewerSetFormat(PETSC_VIEWER_STDOUT_WORLD,PETSC_VIEWER_ASCII_MATLAB );*/
+/*    VecView(sol_tmp,PETSC_VIEWER_STDOUT_WORLD);*/
+/*    #endif*/
 
-      #ifdef DEBUG
-        for(i=0;i<(PetscInt)data_tmp[0];i++){
-    	  PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond ne[%d] eta[%d]=%e %e beta[%d]=%e %e delta[%d]=%e %e\n",i,
-		      i,PetscRealPart(eta[i]),PetscImaginaryPart(eta[i]),
-		      i,PetscRealPart(beta[i]),PetscImaginaryPart(beta[i]),
-		      i,PetscRealPart(delta[i]),PetscImaginaryPart(delta[i]));
+/*      #ifdef DEBUG*/
+/*        for(i=0;i<(PetscInt)data_tmp[0];i++){*/
+/*    	  PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond ne[%d] eta[%d]=%e %e beta[%d]=%e %e delta[%d]=%e %e\n",i,*/
+/*		      i,PetscRealPart(eta[i]),PetscImaginaryPart(eta[i]),*/
+/*		      i,PetscRealPart(beta[i]),PetscImaginaryPart(beta[i]),*/
+/*		      i,PetscRealPart(delta[i]),PetscImaginaryPart(delta[i]));*/
 
-	}
-  #endif
+/*	}*/
+/*  #endif*/
 
   for(j=0;j<ls_power;j++){
     /* r0 = b-Ax*/
@@ -131,10 +131,10 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
     /* now put residual (-A*x + f) into vec_vv(0) */
     ierr = VecWAXPY(r0_tmp,-1.0,vec_tmp,ksp->vec_rhs);CHKERRQ(ierr);
 
-    #ifdef DEBUG
-    VecNorm(r0_tmp,NORM_2,&norm);
-    PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond [%d] r0 norm %e\n",j,norm);
-    #endif
+/*    #ifdef DEBUG*/
+/*    VecNorm(r0_tmp,NORM_2,&norm);*/
+/*    PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond [%d] r0 norm %e\n",j,norm);*/
+/*    #endif*/
 
     /* r0 = w0*/
     ierr=VecCopy(r0_tmp,w0_tmp);CHKERRQ(ierr);
@@ -145,33 +145,34 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
 //     ierr=VecAXPY(x_tmp,eta[0],w0_tmp);CHKERRQ(ierr);
     ierr=VecScale(x_tmp,eta[0]);CHKERRQ(ierr);
     ierr=VecSet(w_1_tmp,(PetscScalar)0.0);CHKERRQ(ierr);
-  #ifdef DEBUGDATA
-    VecNorm(x_tmp,NORM_2,&norm);
-    PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond Temp [%d] x_tmp 1 norm %e (%e)\n",j,i,norm,PetscRealPart(eta[0]));
-#endif
+/*  #ifdef DEBUGDATA*/
+/*    VecNorm(x_tmp,NORM_2,&norm);*/
+/*    PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond Temp [%d] x_tmp 1 norm %e (%e)\n",j,i,norm,PetscRealPart(eta[0]));*/
+/*#endif*/
     /* depending ton the ls polynom size (PetscInt)data_tmp[0] */
     for(i=0;i<(PetscInt)data_tmp[0]-1;i++){
       /* w1=-alpha*w0 - delta[i]*w_1 ((  y = alpha x + delta y. )) (Vec y,PetscScalar alpha,PetscScalar beta,Vec x)*/
       ierr=VecCopy(w_1_tmp,w1_tmp);CHKERRQ(ierr);
+      printf("\n!!!!! delta[%d] = %f \n",i,delta[i] );
       ierr=VecAXPBY(w1_tmp,-alpha,-(PetscScalar)delta[i],w0_tmp);CHKERRQ(ierr);
-      #ifdef DEBUGDATA
-      VecNorm(w1_tmp,NORM_2,&norm);
-    PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond Temp [%d][%d] w1_tmp 1 norm %e (%e %e)\n",j,i,norm,PetscRealPart(-alpha),PetscRealPart(-delta[i]));
-#endif
+/*      #ifdef DEBUGDATA*/
+/*      VecNorm(w1_tmp,NORM_2,&norm);*/
+/*	PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond Temp [%d][%d] w1_tmp 1 norm %e (%e %e)\n",j,i,norm,PetscRealPart(-alpha),PetscRealPart(-delta[i]));*/
+/*		#endif*/
       /* w1 = w1 - A*w0 */
       ierr = MatMult(Amat,w0_tmp,vec_tmp);CHKERRQ(ierr);
       /* y = alpha x + y.  VecAXPY(Vec y,PetscScalar alpha,Vec x)*/
       ierr = VecAXPY(w1_tmp,1.0,vec_tmp);CHKERRQ(ierr);
-      #ifdef DEBUGDATA
-      VecNorm(w1_tmp,NORM_2,&norm);
-    PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond Temp [%d][%d] w1_tmp 2 norm %e\n",j,i,norm);
-#endif
+/*      #ifdef DEBUGDATA*/
+/*      VecNorm(w1_tmp,NORM_2,&norm);*/
+/*    PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond Temp [%d][%d] w1_tmp 2 norm %e\n",j,i,norm);*/
+/*#endif*/
       /* w1 = w1/beta[i] */
       ierr=VecScale(w1_tmp,1/beta[i]);CHKERRQ(ierr);
-      #ifdef DEBUGDATA
-      VecNorm(w1_tmp,NORM_2,&norm);
-    PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond Temp [%d][%d] w1_tmp 3 norm %e (%e)\n",j,i,norm,PetscRealPart(1/beta[i]));
-#endif
+/*      #ifdef DEBUGDATA*/
+/*      VecNorm(w1_tmp,NORM_2,&norm);*/
+/*    PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond Temp [%d][%d] w1_tmp 3 norm %e (%e)\n",j,i,norm,PetscRealPart(1/beta[i]));*/
+/*#endif*/
       /* w_1 = w0 */
       ierr=VecCopy(w0_tmp,w_1_tmp);CHKERRQ(ierr);
 
@@ -180,10 +181,10 @@ PetscErrorCode GmresLSAPrecond(com_lsa * com, KSP ksp)
 
       /* x = x + (w0 * eta[i] ) */
       ierr=VecAXPY(x_tmp,eta[i+1],w0_tmp);CHKERRQ(ierr);
-      #ifdef DEBUGDATA
-      VecNorm(x_tmp,NORM_2,&norm);
-    PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond Temp [%d][%d] x_tmp norm %e (%e)\n",j,i,norm,PetscRealPart(delta[i]));
-#endif
+/*      #ifdef DEBUGDATA*/
+/*      VecNorm(x_tmp,NORM_2,&norm);*/
+/*    PetscPrintf(PETSC_COMM_WORLD,"#} GMRESLSPrecond Temp [%d][%d] x_tmp norm %e (%e)\n",j,i,norm,PetscRealPart(delta[i]));*/
+/*#endif*/
     }
 
     /* x1= x1+x*/

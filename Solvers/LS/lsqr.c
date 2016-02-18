@@ -242,12 +242,12 @@ PetscErrorCode LSQR(com_lsa * com, int * vector_size){
 
 			/* place the computed results inside the array */
 			scalar_tmp=(PetscScalar)ls_eigen;
-			for(i=0;i<ls_eigen;i++){
-			    PetscPrintf(PETSC_COMM_WORLD,"@} %d LSQR eta[%d]=%e %e beta[%d]=%e %e delta[%d]=%e %e\n",ls_eigen,
-			      i,PetscRealPart(eta[i]),PetscImaginaryPart(eta[i]),
-			      i,PetscRealPart(beta[i]),PetscImaginaryPart(beta[i]),
-			      i,PetscRealPart(delta[i]),PetscImaginaryPart(delta[i]));
-			}
+/*			for(i=0;i<ls_eigen;i++){*/
+/*			    PetscPrintf(PETSC_COMM_WORLD,"@} %d LSQR eta[%d]=%e %e beta[%d]=%e %e delta[%d]=%e %e\n",ls_eigen,*/
+/*			      i,PetscRealPart(eta[i]),PetscImaginaryPart(eta[i]),*/
+/*			      i,PetscRealPart(beta[i]),PetscImaginaryPart(beta[i]),*/
+/*			      i,PetscRealPart(delta[i]),PetscImaginaryPart(delta[i]));*/
+/*			}*/
 
 			ierr=PetscMemcpy(&result_array[0],&scalar_tmp,1*sizeof(PetscScalar));CHKERRQ(ierr);
 			ierr=PetscMemcpy(&result_array[1],&alpha,1*sizeof(PetscScalar));CHKERRQ(ierr);
